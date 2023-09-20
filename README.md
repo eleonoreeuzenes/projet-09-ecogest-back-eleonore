@@ -1,16 +1,25 @@
 # Ecogest backend API : 
 
-1. Créer le fichier .env
+## Prérequis : 
+
+* avoir PHP version 8.1 ou 8.2
+* avoir composer d'installer
+
+## Créer le fichier .env
 
 `cp .env.example .env`
 
-2. Lancer docker
+## Installer les dépendances
+
+`composer install`
+
+## Lancer docker
 
 `docker-compose up -d`
 ou
 `docker compose up -d`
 
-3. Générer la clé
+## Générer la clé
 
 `vendor/bin/sail artisan key:generate`
 
