@@ -20,11 +20,11 @@ return new class extends Migration
             )->cascadeOnDelete();
             $table->foreignId('author_id')->constrained(
                 table: 'users',
-                indexName: 'id'
+                indexName: 'post_user_id'
             )->cascadeOnDelete();
             $table->string('tag')->nullable();
             $table->string('title')->nullable();;
-            $table->string('description')->nullable();;
+            $table->text('description')->nullable();;
             $table->string('image')->nullable();;
             $table->string('position')->nullable();;
             $table->enum('type', ['action', 'challenge']);
