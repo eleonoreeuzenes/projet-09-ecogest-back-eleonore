@@ -50,6 +50,6 @@ class User extends Authenticatable
 
     public function badge()
     {
-        return $this->hasOne(Reward::class);
+        return $this->belongsTo(Reward::class, 'badge_id');
     }
 }
