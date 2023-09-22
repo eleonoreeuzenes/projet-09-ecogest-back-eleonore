@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->foreignId('badge_id')->default(1)->constrained(
                 table: 'rewards',
                 indexName: 'id'
-            );
+            )->cascadeOnDelete();
             $table->timestamps();
         });
     }

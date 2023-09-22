@@ -3,8 +3,9 @@
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\PostController;
-use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserPointCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,9 +27,15 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::get('/me', [UserController::class, 'userData']);
+    Route::patch('/me', [UserController::class, 'update']);
+    Route::delete('/me', [UserController::class, 'destroy']);
+
+
+    
     // API business routes
     Route::apiResources([
         'posts'       => PostController::class,
-        'categories'  => CategoryController::class 
+        'categories'  => CategoryController::class,
+        'me/points/categories'  => UserPointCategoryController::class,
     ]);
 });
