@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     
+
     // API business routes
     Route::apiResources([
         'posts'       => PostController::class,
