@@ -39,7 +39,7 @@ class RewardSeeder extends Seeder
             'point' => 15000
         ]);
         Reward::factory()->create([
-            'title' => 'trophée',
+            'title' => 'Trophée',
             'type' => 'trophy',
             'point' => 250
         ]);
