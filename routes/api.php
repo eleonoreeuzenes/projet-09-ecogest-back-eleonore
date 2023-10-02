@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResources([
         'posts'       => PostController::class,
         'categories'  => CategoryController::class,
-        'me/points/categories'  => UserPointCategoryController::class,
+        
+        // 'me/points/categories'  => UserPointCategoryController::class,
     ]);
 });
