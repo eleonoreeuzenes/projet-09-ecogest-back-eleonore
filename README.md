@@ -1,21 +1,44 @@
 # Ecogest backend API : 
 
-1. Créer le fichier .env
+
+## Créer le fichier .env
 
 `cp .env.example .env`
 
-2. Lancer docker
+
+## Lancer docker
 
 `docker-compose up -d`
 ou
 `docker compose up -d`
 
-3. Générer la clé
+## Entrer dans le container docker
 
-`vendor/bin/sail artisan key:generate`
+`docker exec -it app /bin/sh`
+
+* le container s'appelle 'app', car définit ainsi dans le docker-compose.yml
+
+## Installer les dépendances Laravel du composer.json dans le container 
+
+`composer install`
+
+## Générer la clé à l'intérieur du container
+
+`php artisan key:generate`
+
+## Donner les droits à tous les fichiers du container 
+
+`chmod -Rf 777 .`
+
+## Jouer les migrations avec seeding  à l'intérieur du container
+
+`php artisan migrate:fresh --seed`
 
 
-https://kourou.oclock.io/ressources/recap-quotidien/meduse-e13-sail-orm-eloquent-migrations-seeders/
+## Adminer est disponible ici :
+* http://localhost:9080
 
 
-https://laravel.com/docs/10.x/sail
+## L'api laravel est disponible ici : 
+* http://localhost:8080
+
