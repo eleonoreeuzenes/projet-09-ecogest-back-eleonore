@@ -10,7 +10,7 @@
         "hot": "mix watch --hot",
         "prod": "npm run production",
         "production": "mix --production",
-        "heroku-build": "php artisan migrate && php artisan cache:clear && chmod -R 777 public"
+        "heroku-build": "php artisan migrate:fresh --seed && php artisan cache:clear && chmod -R 777 public"
     },
     
     "devDependencies": {
