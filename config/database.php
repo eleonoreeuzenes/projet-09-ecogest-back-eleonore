@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Str;
 
+// production URL of database:
+// $DATABASE_URL=parse_url('postgres://eihfwouzfgvkgw:bd2076f51b2ffd56070b11021a6150bb8cf35da4844ae9feecefa2f6f416d781@ec2-54-211-177-159.compute-1.amazonaws.com:5432/d3kkgm2rgomdnu');
+
 return [
 
     /*
@@ -16,6 +19,8 @@ return [
     */
 
     'default' => env('DB_CONNECTION', 'pgsql'),
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -125,7 +130,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [
