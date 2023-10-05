@@ -6,23 +6,16 @@ use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserPointCategory extends Model
+class UserTrophy extends Model
 {
     use HasFactory;
 
-        /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'user_point_category';
+    protected $table = 'user_trophy';
 
     protected $fillable = [
         'id',
         'user_id',
-        'category_id',
-        'current_point',
-        'total_point',
+        'category_id'
     ];
 
     public function users()
@@ -30,7 +23,7 @@ class UserPointCategory extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function category()
+    public function categories()
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
