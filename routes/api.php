@@ -34,11 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/me', [UserController::class, 'destroy']);
 
 
-    
-
     // API business routes
     Route::apiResources([
-        'posts'       => PostController::class,
+        // posts?page=1 => 30 firsts posts; posts?page=2 => 30 next posts
+        'posts'       => PostController::class, 
         'categories'  => CategoryController::class,
         
         // 'me/points/categories'  => UserPointCategoryController::class,
