@@ -101,8 +101,8 @@ class PostController extends Controller
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
-            'type' => 'required|string|max:255',
-            'level' => 'required|string|max:255',
+            'type' => 'string|max:255',
+            'level' => 'string|max:255',
         ]);
 
         $validated['tag'] = implode($request['tag.*']);
