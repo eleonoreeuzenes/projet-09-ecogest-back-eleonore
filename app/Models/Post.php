@@ -10,7 +10,7 @@ use App\Models\User;
 
 class Post extends Model
 {
-    use  HasFactory;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -50,5 +50,9 @@ class Post extends Model
     public function comment()
     {
         return $this->hasMany(Comment::class);
+    }
+    public function userPostParticipation()
+    {
+        return $this->hasMany(UserPostParticipation::class);
     }
 }

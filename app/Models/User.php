@@ -9,6 +9,7 @@ use App\Models\Reward;
 use App\Models\Post;
 use App\Models\Subscription;
 use App\Models\UserPointCategory;
+use App\Models\UserPostParticipation;
 use App\Models\UserTrophy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -72,7 +73,7 @@ class User extends Authenticatable
 
     public function userTrophy()
     {
-        return $this->hasMany(UserTrophy::class);
+        return $this->hasMany(UserTrophy::class, 'user_id');
     }
 
     public function follower()
@@ -92,5 +93,10 @@ class User extends Authenticatable
     public function comment()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function userPostParticipation()
+    {
+        return $this->hasMany(UserPostParticipation::class, 'participant_id');
     }
 }

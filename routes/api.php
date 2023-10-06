@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPointCategoryController;
+use App\Http\Controllers\Api\UserPostParticipationController;
+use App\Http\Controllers\Api\UserTrophyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,17 +31,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
         return $request->user();
     });
-    Route::get('/me', [UserController::class, 'userData']);
+    // User 
+    Route::get('/me', [UserController::class, 'getUserData']);
     Route::patch('/me', [UserController::class, 'update']);
     Route::delete('/me', [UserController::class, 'destroy']);
 
+    // User post participation
+    Route::get('posts/{postId}/participants', [UserPostParticipationController::class, 'getParticipantsByPostId']);
+    Route::post('posts/{postId}/participants', [UserPostParticipationController::class, 'store']);
+    Route::patch('posts/{postId}/participants', [UserPostParticipationController::class, 'update']);
+    Route::delete('posts/{postId}/participants/{userId}', [UserPostParticipationController::class, 'destroy']);
+    // end a challenge 
+    Route::patch('posts/{postId}/participants/completed', [UserPostParticipationController::class, 'endChallenge']);
 
     // API business routes
     Route::apiResources([
-        // posts?page=1 => 30 firsts posts; posts?page=2 => 30 next posts
-        'posts'       => PostController::class, 
-        'categories'  => CategoryController::class,
-        
-        // 'me/points/categories'  => UserPointCategoryController::class,
+        'posts'       => PostController::class, // posts?page=1 => 30 firsts posts; posts?page=2 => 30 next posts
+        'categories'  => CategoryController::class, 
+        'me/points/categories'  => UserPointCategoryController::class, // user points in categories
+        'me/trophies'  => UserTrophyController::class, // user trophies
     ]);
 });

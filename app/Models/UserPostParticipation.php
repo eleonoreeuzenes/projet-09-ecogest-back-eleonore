@@ -11,16 +11,19 @@ class UserPostParticipation extends Model
 {
     use HasFactory;
 
+
+    protected $table = 'user_post_participation';
+
     protected $fillable = [
         'id',
-        'user_id',
+        'participant_id',
         'post_id',
         'is_completed'
     ];
 
     public function users()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'participant_id');
     }
 
     public function posts()
