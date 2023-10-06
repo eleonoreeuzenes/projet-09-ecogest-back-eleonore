@@ -143,6 +143,9 @@ class UserPostParticipationController extends Controller
         UserPointService::updateUserCurrentPointCategory($post, $userPointCategory, $trophy);
         UserPointService::updateUserTotalPointCategory($post, $userPointCategory);
 
+        $userModel = User::where('id', $user->id)->firstOrFail();
+        UserPointService::setNewBadge($userModel);
+
         $userPostParticipation->update();
 
         return response()->json($userPostParticipation);

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Post;
+use App\Models\User;
 use App\Models\UserPointCategory;
 use App\Models\Reward;
 use App\Models\UserTrophy;
@@ -53,6 +54,22 @@ class UserPointService
             case 'hard':
                 return 30;
         }
+    }
+
+    public static function setNewBadge(User $user)
+    {
+        $userPointCategories = UserPointCategory::select('total_point')->where('user_id', $user->id)->get();
+        $userTotalPoints = 0;
+        foreach($userPointCategories as $userPointCategory) {
+            $userTotalPoints += $userPointCategory->total_point;
+        }
+        $whereData = [
+            ['type' , 'badge'],
+            ['point', '<=',  $userTotalPoints]
+        ];
+        $reward = Reward::orderBy('point', 'DESC')->where($whereData)->firstOrFail();
+        $user->badge_id = $reward->id;
+        $user->save();
     }
 
 }
