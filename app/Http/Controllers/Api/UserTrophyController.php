@@ -14,10 +14,9 @@ class UserTrophyController extends Controller
     /**
      * Recover all trophies of a user.
      */
-    public function index()
+    public function index(int $userId)
     {
-        $user = auth()->user();
-
+        $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
@@ -29,6 +28,9 @@ class UserTrophyController extends Controller
 
         }
 
+        foreach ($userTrophies as $userTrophy) {
+            $userTrophy->categories;
+        }
         return response()->json($userTrophies);
     }
 
@@ -63,20 +65,20 @@ class UserTrophyController extends Controller
     /**
      * Display a trophy of a user.
      */
-    public function show(int $id)
+    public function show(int $userId, int $categoryId)
     {
-        $user = auth()->user();
-
+        $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $userTrophy = userTrophy::where(['user_id' => $user->id, 'id' => $id])->first();
+        $userTrophy = UserTrophy::where(['user_id' => $user->id, 'category_id' => $categoryId])->first();
 
         if (!$userTrophy) {
             return response()->json(['error' => 'Trophy not found.'], 404);
         }
 
+        $userTrophy->categories;
         return response()->json($userTrophy);
     }
 

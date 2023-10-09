@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\UserPointCategory;
+use GuzzleHttp\Psr7\Query;
 
 class UserPostParticipationController extends Controller
 {
@@ -123,7 +124,7 @@ class UserPostParticipationController extends Controller
     }
 
 
-        /**
+    /**
      * Update the specified resource in storage.
      */
     public function endChallenge(int $postId)
@@ -149,6 +150,37 @@ class UserPostParticipationController extends Controller
         $userPostParticipation->update();
 
         return response()->json($userPostParticipation);
+    }
+
+    /**
+     * Get all posts by user id
+     */
+    public function getPostsByUser(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where('participant_id', $user->id)->get();
+        $userPostParticipations->load('posts');
+        return response()->json($userPostParticipations);
+    }
+
+    /**
+     * Get posts by user id with is_completed query param
+     */
+    public function getPostsByUserWithIsCompletedParam(int $userId, string $queryParam)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => $queryParam])->get();
+
+        $userPostParticipations->load('posts');
+        return response()->json($userPostParticipations);
     }
 
 }
