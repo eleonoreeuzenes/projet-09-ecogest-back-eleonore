@@ -16,6 +16,15 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::orderBy('created_at', 'DESC')->paginate(30);
+
+        foreach ($posts as $post) {
+            $post->userPostParticipation;
+            $post->category;
+            $post->like; 
+            $post->comment;
+            $post->user;
+        }
+
         return response()->json($posts);
     }
 
@@ -86,6 +95,10 @@ class PostController extends Controller
         }
 
         $post->userPostParticipation;
+        $post->category;
+        $post->like; 
+        $post->comment;
+        $post->user;
 
         return response()->json($post);
     }
