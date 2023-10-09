@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/{userId}/posts/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
     Route::get('users/{userId}/posts/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
     Route::get('users/{userId}/posts/abandoned', [UserPostParticipationController::class, 'getPostsByUserAbandoned']);
+    Route::get('users/{userId}/posts/next', [UserPostParticipationController::class, 'getPostsByUserNext']);
     Route::get('users/{userId}/posts', [UserPostParticipationController::class, 'getPostsByUser']);
 
     // API business routes

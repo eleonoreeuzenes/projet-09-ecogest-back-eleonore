@@ -66,7 +66,7 @@ class UserPostParticipationController extends Controller
             'post_id' => $postId,
             'is_completed' => $request['is_completed'],
         ]);
-        $userAlreadyParticipates = UserPostParticipation::where(['ca' => $postId, 'participant_id' => $user->id])->first();
+        $userAlreadyParticipates = UserPostParticipation::where(['post_id' => $postId, 'participant_id' => $user->id])->first();
 
         PostService::createUserPointCategoryWithZeroPoint($post, $user->id);
 
@@ -195,15 +195,15 @@ class UserPostParticipationController extends Controller
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
-        $userPostParticipationsInProgress = [];
+        $userPostParticipationsAbandoned = [];
         foreach ($userPostParticipations as $userPostParticipation) {
             $post = $userPostParticipation->posts;
             $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
             if ($end_date != null && $end_date < new DateTime()) {
-                $userPostParticipationsInProgress[] = $post;
+                $userPostParticipationsAbandoned[] = $post;
             }
         }
-        return response()->json($userPostParticipationsInProgress);
+        return response()->json($userPostParticipationsAbandoned);
     }
 
     /**
@@ -221,11 +221,35 @@ class UserPostParticipationController extends Controller
         foreach ($userPostParticipations as $userPostParticipation) {
             $post = $userPostParticipation->posts;
             $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
-            if ($end_date != null && $end_date > new DateTime()) {
+            $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+            if ($start_date < new DateTime() && $end_date > new DateTime()) {
                 $userPostParticipationsInProgress[] = $post;
             }
         }
         return response()->json($userPostParticipationsInProgress);
+    }
+
+    
+    /**
+     * Get posts by user id with is_completed next
+     */
+    public function getPostsByUserNext(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipationsNext = [];
+        foreach ($userPostParticipations as $userPostParticipation) {
+            $post = $userPostParticipation->posts;
+            $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+            if ($start_date != null && $start_date < new DateTime()) {
+                $userPostParticipationsNext[] = $post;
+            }
+        }
+        return response()->json($userPostParticipationsNext);
     }
 
 }
