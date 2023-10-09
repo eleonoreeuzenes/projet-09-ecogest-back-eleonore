@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPointCategoryController;
 use App\Http\Controllers\Api\UserPostParticipationController;
@@ -43,6 +44,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('posts/{postId}/participants/{userId}', [UserPostParticipationController::class, 'destroy']);
     // end a challenge 
     Route::patch('posts/{postId}/participants/completed', [UserPostParticipationController::class, 'endChallenge']);
+
+    Route::post('/posts/{postId}/likes', [LikeController::class, 'likePost']);
+    Route::delete('/posts/{postId}/likes', [LikeController::class, 'unlikePost']);
 
     // API business routes
     Route::apiResources([
