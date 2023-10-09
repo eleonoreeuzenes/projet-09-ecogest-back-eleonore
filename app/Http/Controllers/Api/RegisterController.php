@@ -19,12 +19,11 @@ class RegisterController extends Controller
     {
         $validatorEmail = Validator::make($request->all(), [
             'email' => 'required|email',
-            'username' => 'required|string|max:29'
         ]);
 
         if ($validatorEmail->fails()) {
             return response()->json([
-                'message' => 'Username or email format is invalid.'
+                'message' => 'Email format is invalid.'
             ], 400);
         }
 
@@ -34,12 +33,21 @@ class RegisterController extends Controller
             ], 400);
         }
 
+        $validatorUsername = Validator::make($request->all(), [
+            'username' => 'required|string|min:5|max:29'
+        ]);
+
+        if ($validatorUsername->fails()) {
+            return response()->json([
+                'message' => 'Username format is invalid (it musts contain between 5 & 29 characters).'
+            ], 400);
+        }
+
         if (User::where('username', $request['username'])->count() > 0) {
             return response()->json([
                 'message' => 'Username already used.'
             ], 400);
         }
-
 
         $validatorPassword = Validator::make($request->all(), [
             'password' => [
