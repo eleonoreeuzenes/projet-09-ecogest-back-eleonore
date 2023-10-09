@@ -48,7 +48,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{postId}/likes', [LikeController::class, 'likePost']);
     Route::delete('/posts/{postId}/likes', [LikeController::class, 'unlikePost']);
 
-    Route::get('users/{userId}/posts/completed/{queryParam}', [UserPostParticipationController::class, 'getPostsByUserWithIsCompletedParam']);
+    
+    Route::get('users/{userId}/posts/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
+    Route::get('users/{userId}/posts/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
+    Route::get('users/{userId}/posts/abandoned', [UserPostParticipationController::class, 'getPostsByUserAbandoned']);
     Route::get('users/{userId}/posts', [UserPostParticipationController::class, 'getPostsByUser']);
 
     // API business routes
