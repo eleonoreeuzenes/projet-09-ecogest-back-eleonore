@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Comment;
+use App\Models\Like;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
 class Post extends Model
 {
-    use  HasFactory;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -38,5 +40,19 @@ class Post extends Model
     public function category()
     {
         return $this->hasOne(Category::class);
+    }
+
+    public function like()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function comment()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function userPostParticipation()
+    {
+        return $this->hasMany(UserPostParticipation::class);
     }
 }

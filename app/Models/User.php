@@ -3,9 +3,14 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Reward;
 use App\Models\Post;
+use App\Models\Subscription;
 use App\Models\UserPointCategory;
+use App\Models\UserPostParticipation;
+use App\Models\UserTrophy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -60,9 +65,38 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class);
     }
-    
+
     public function userPointCategory()
     {
         return $this->hasMany(UserPointCategory::class);
+    }
+
+    public function userTrophy()
+    {
+        return $this->hasMany(UserTrophy::class, 'user_id');
+    }
+
+    public function follower()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function following()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function like()
+    {
+        return $this->hasMany(Like::class);
+    }
+    public function comment()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function userPostParticipation()
+    {
+        return $this->hasMany(UserPostParticipation::class, 'participant_id');
     }
 }

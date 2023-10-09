@@ -42,8 +42,6 @@ class UserPointCategoryController extends Controller
 
         $validated = $request->validate([
             'category_id' => 'required',
-            'current_point' => 'required',
-            'total_point' => 'required',
         ]);
 
         $category = Category::where('id', $request['category_id'])->first();
@@ -59,8 +57,6 @@ class UserPointCategoryController extends Controller
         $userPointCategory = UserPointCategory::create([
             'user_id' => $user->id,
             'category_id' => $category->id,
-            'current_point' => $validated['current_point'],
-            'total_point' => $validated['total_point'],
         ]);
 
         $userPointCategory->save();
@@ -90,7 +86,7 @@ class UserPointCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $categoryId)
+    public function update(int $categoryId)
     {
         $user = auth()->user();
 
@@ -99,13 +95,8 @@ class UserPointCategoryController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $validated = $request->validate([
-            'current_point' => 'required',
-            'total_point' => 'required',
-        ]);
-
-        $userPointCategory->update($validated);
+        
+        $userPointCategory->update();
 
         return response()->json($userPointCategory);
     }
