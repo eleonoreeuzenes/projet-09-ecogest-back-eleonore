@@ -48,11 +48,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{postId}/likes', [LikeController::class, 'likePost']);
     Route::delete('/posts/{postId}/likes', [LikeController::class, 'unlikePost']);
 
+    
+    Route::get('users/{userId}/posts/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
+    Route::get('users/{userId}/posts/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
+    Route::get('users/{userId}/posts/abandoned', [UserPostParticipationController::class, 'getPostsByUserAbandoned']);
+    Route::get('users/{userId}/posts/next', [UserPostParticipationController::class, 'getPostsByUserNext']);
+    Route::get('users/{userId}/posts', [UserPostParticipationController::class, 'getPostsByUser']);
+
     // API business routes
     Route::apiResources([
         'posts'       => PostController::class, // posts?page=1 => 30 firsts posts; posts?page=2 => 30 next posts
         'categories'  => CategoryController::class, 
-        'me/points/categories'  => UserPointCategoryController::class, // user points in categories
-        'me/trophies'  => UserTrophyController::class, // user trophies
+        'users/{userId}/categories-points'  => UserPointCategoryController::class, // user points in categories
+        'users/{userId}/trophies'  => UserTrophyController::class, // user trophies
     ]);
 });

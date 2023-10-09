@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Post;
 use App\Models\UserPointCategory;
 use App\Models\UserPostParticipation;
+use DateTime;
 
 class PostService
 {
@@ -14,7 +15,7 @@ class PostService
         if ($post->type === 'action') {
             $isCompleted = true;
         } else {
-            $isCompleted = $post->end_date >= now() ? true : false;
+            $isCompleted = $post->end_date >= new DateTime() ? true : false;
         }
 
         $userPostParticipation = UserPostParticipation::create([

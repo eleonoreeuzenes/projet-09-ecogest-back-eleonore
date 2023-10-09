@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
 use App\Models\UserPointCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -12,15 +13,14 @@ class UserPointCategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(int $userId)
     {
-        $user = auth()->user();
-
+        $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $userPointCategory = UserPointCategory::where('user_id', $user->id)->get();
+        $userPointCategory = UserPointCategory::where('user_id', $userId)->get();
 
         if (!$userPointCategory) {
             return response()->json(['error' => 'User point category not found.'], 404);
@@ -66,10 +66,9 @@ class UserPointCategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $categoryId)
+    public function show(int $userId, int $categoryId)
     {
-        $user = auth()->user();
-
+        $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }

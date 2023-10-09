@@ -6,11 +6,13 @@ use App\Models\Reward;
 use App\Models\UserPostParticipation;
 use App\Services\PostService;
 use App\Services\UserPointService;
+use DateTime;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\UserPointCategory;
+use GuzzleHttp\Psr7\Query;
 
 class UserPostParticipationController extends Controller
 {
@@ -64,7 +66,7 @@ class UserPostParticipationController extends Controller
             'post_id' => $postId,
             'is_completed' => $request['is_completed'],
         ]);
-        $userAlreadyParticipates = UserPostParticipation::where(['ca' => $postId, 'participant_id' => $user->id])->first();
+        $userAlreadyParticipates = UserPostParticipation::where(['post_id' => $postId, 'participant_id' => $user->id])->first();
 
         PostService::createUserPointCategoryWithZeroPoint($post, $user->id);
 
@@ -123,7 +125,7 @@ class UserPostParticipationController extends Controller
     }
 
 
-        /**
+    /**
      * Update the specified resource in storage.
      */
     public function endChallenge(int $postId)
@@ -149,6 +151,105 @@ class UserPostParticipationController extends Controller
         $userPostParticipation->update();
 
         return response()->json($userPostParticipation);
+    }
+
+    /**
+     * Get all posts by user id
+     */
+    public function getPostsByUser(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where('participant_id', $user->id)->get();
+        $userPostParticipations->load('posts');
+        return response()->json($userPostParticipations);
+    }
+
+    /**
+     * Get posts by user id with is_completed true
+     */
+    public function getPostsByUserCompleted(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
+
+        $userPostParticipations->load('posts');
+        return response()->json($userPostParticipations);
+    }
+
+    /**
+     * Get posts by user id with is_completed false / abandoned
+     */
+    public function getPostsByUserAbandoned(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipationsAbandoned = [];
+        foreach ($userPostParticipations as $userPostParticipation) {
+            $post = $userPostParticipation->posts;
+            $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
+            if ($end_date != null && $end_date < new DateTime()) {
+                $userPostParticipationsAbandoned[] = $post;
+            }
+        }
+        return response()->json($userPostParticipationsAbandoned);
+    }
+
+    /**
+     * Get posts by user id with is_completed false / in progress
+     */
+    public function getPostsByUserInProgress(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipationsInProgress = [];
+        foreach ($userPostParticipations as $userPostParticipation) {
+            $post = $userPostParticipation->posts;
+            $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
+            $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+            if ($start_date < new DateTime() && $end_date > new DateTime()) {
+                $userPostParticipationsInProgress[] = $post;
+            }
+        }
+        return response()->json($userPostParticipationsInProgress);
+    }
+
+    
+    /**
+     * Get posts by user id with is_completed next
+     */
+    public function getPostsByUserNext(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipationsNext = [];
+        foreach ($userPostParticipations as $userPostParticipation) {
+            $post = $userPostParticipation->posts;
+            $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+            if ($start_date != null && $start_date < new DateTime()) {
+                $userPostParticipationsNext[] = $post;
+            }
+        }
+        return response()->json($userPostParticipationsNext);
     }
 
 }
