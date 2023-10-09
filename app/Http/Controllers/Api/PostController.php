@@ -18,7 +18,9 @@ class PostController extends Controller
         $posts = Post::orderBy('created_at', 'DESC')->paginate(30);
 
         foreach ($posts as $post) {
-            $post->userPostParticipation;
+            foreach ($post->userPostParticipation as $userPostParticipation) {
+                $userPostParticipation->users;
+            }
             $post->category;
             $post->like; 
             $post->comment;
@@ -94,7 +96,9 @@ class PostController extends Controller
             return response()->json(['error' => 'Post not found.'], 404);
         }
 
-        $post->userPostParticipation;
+        foreach ($post->userPostParticipation as $userPostParticipation) {
+            $userPostParticipation->users;
+        }
         $post->category;
         $post->like; 
         $post->comment;
