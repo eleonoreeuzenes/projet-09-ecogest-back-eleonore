@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\UserPostParticipationController;
 use App\Http\Controllers\Api\UserTrophyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Knuckles\Scribe\Attributes\Header;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +28,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/test', fn() => json_encode(["test", "test"]));
 
 // Authentication
+/**
+ * @unauthenticated
+ */
 Route::post('/login', [LoginController::class, 'login']);
+/**
+ * @unauthenticated
+ */
 Route::post('/register', [RegisterController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
