@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPointCategoryController;
@@ -48,6 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{postId}/likes', [LikeController::class, 'likePost']);
     Route::delete('/posts/{postId}/likes', [LikeController::class, 'unlikePost']);
 
+    Route::post('posts/{postId}/comments', [CommentController::class, 'store']);
+    Route::patch('posts/comments/{id}', [CommentController::class, 'update']);
+    Route::delete('posts/comments/{id}', [CommentController::class, 'destroy']);
+    
     
     Route::get('users/{userId}/posts/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
     Route::get('users/{userId}/posts/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
