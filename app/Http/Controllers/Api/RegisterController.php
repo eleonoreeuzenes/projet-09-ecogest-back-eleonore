@@ -18,7 +18,7 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $validatorEmail = Validator::make($request->all(), [
-            'email' => 'required|email'
+            'email' => 'required|email',
         ]);
 
         if ($validatorEmail->fails()) {
@@ -30,6 +30,22 @@ class RegisterController extends Controller
         if (User::where('email', $request['email'])->count() > 0) {
             return response()->json([
                 'message' => 'Email already used.'
+            ], 400);
+        }
+
+        $validatorUsername = Validator::make($request->all(), [
+            'username' => 'required|string|min:5|max:29'
+        ]);
+
+        if ($validatorUsername->fails()) {
+            return response()->json([
+                'message' => 'Username format is invalid (it musts contain between 5 & 29 characters).'
+            ], 400);
+        }
+
+        if (User::where('username', $request['username'])->count() > 0) {
+            return response()->json([
+                'message' => 'Username already used.'
             ], 400);
         }
 
@@ -49,6 +65,7 @@ class RegisterController extends Controller
 
         $user = User::create([
             'email' => $request['email'],
+            'username' => $request['username'],
             'password' => Hash::make($request['password']),
         ]);
         $token = $user->createToken('authToken')->plainTextToken;

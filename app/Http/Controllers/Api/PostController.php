@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Services\PostService;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -14,7 +15,18 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::orderBy('created_at', 'DESC')->get();
+        $posts = Post::orderBy('created_at', 'DESC')->paginate(30);
+
+        foreach ($posts as $post) {
+            foreach ($post->userPostParticipation as $userPostParticipation) {
+                $userPostParticipation->users;
+            }
+            $post->category;
+            $post->like; 
+            $post->comment;
+            $post->user;
+        }
+
         return response()->json($posts);
     }
 
@@ -30,7 +42,7 @@ class PostController extends Controller
 
         $validated = $request->validate([
             'category_id' => 'required|integer',
-            "tag" => "array",
+            "tag" => "nullable|array",
             "tag.*" => "nullable|string",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -38,6 +50,8 @@ class PostController extends Controller
             'position' => 'nullable|string|max:255',
             'type' => 'required|string|max:255',
             'level' => 'required|string|max:255',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date'
         ]);
 
         $category = Category::where('id', $request['category_id'])->first();
@@ -45,13 +59,20 @@ class PostController extends Controller
             return response()->json(['error' => 'Category not found.'], 404);
         }
 
+        if ($validated['type'] == 'challenge') {
+            if ($request['start_date'] == null || $request['end_date'] == null) {
+                return response()->json(['error' => 'Start date or end date can not be null.'], 400);
+            }
+        }
+
         $validated['author_id'] = $user->id;
         $validated['category_id'] = $category->id;
-        $validated['tag'] = implode($request['tag.*']);
-        // it's a solution to convert string to array from laravel to postgresql
-
-
+        if ($request['tag']) {
+            $validated['tag'] = implode($request['tag.*']);
+            // it's a solution to convert string to array from laravel to postgresql
+        }
         $post = Post::create($validated);
+        PostService::addAuthorPostToUserPostParticipation($post);
 
         $post->save();
         return response()->json($validated);
@@ -74,6 +95,14 @@ class PostController extends Controller
         if (!$post) {
             return response()->json(['error' => 'Post not found.'], 404);
         }
+
+        foreach ($post->userPostParticipation as $userPostParticipation) {
+            $userPostParticipation->users;
+        }
+        $post->category;
+        $post->like; 
+        $post->comment;
+        $post->user;
 
         return response()->json($post);
     }
@@ -101,12 +130,22 @@ class PostController extends Controller
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
-            'type' => 'required|string|max:255',
-            'level' => 'required|string|max:255',
+            'type' => 'string|max:255',
+            'level' => 'string|max:255',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date'
         ]);
 
-        $validated['tag'] = implode($request['tag.*']);
-        // it's a solution to convert string to array from laravel to postgresql
+        if ($validated['type'] == 'challenge') {
+            if ($request['start_date'] == null || $request['end_date'] == null) {
+                return response()->json(['error' => 'Start date or end date can not be null.'], 400);
+            }
+        }
+
+        if ($request['tag']) {
+            $validated['tag'] = implode($request['tag.*']);
+            // it's a solution to convert string to array from laravel to postgresql
+        }
 
         $post->update($validated);
 

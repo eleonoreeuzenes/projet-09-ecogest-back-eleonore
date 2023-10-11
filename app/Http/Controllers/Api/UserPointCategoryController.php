@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
 use App\Models\UserPointCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -12,15 +13,14 @@ class UserPointCategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(int $userId)
     {
-        $user = auth()->user();
-
+        $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $userPointCategory = UserPointCategory::where('user_id', $user->id)->get();
+        $userPointCategory = UserPointCategory::where('user_id', $userId)->get();
 
         if (!$userPointCategory) {
             return response()->json(['error' => 'User point category not found.'], 404);
@@ -42,8 +42,6 @@ class UserPointCategoryController extends Controller
 
         $validated = $request->validate([
             'category_id' => 'required',
-            'current_point' => 'required',
-            'total_point' => 'required',
         ]);
 
         $category = Category::where('id', $request['category_id'])->first();
@@ -59,8 +57,6 @@ class UserPointCategoryController extends Controller
         $userPointCategory = UserPointCategory::create([
             'user_id' => $user->id,
             'category_id' => $category->id,
-            'current_point' => $validated['current_point'],
-            'total_point' => $validated['total_point'],
         ]);
 
         $userPointCategory->save();
@@ -70,10 +66,9 @@ class UserPointCategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $categoryId)
+    public function show(int $userId, int $categoryId)
     {
-        $user = auth()->user();
-
+        $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
@@ -90,7 +85,7 @@ class UserPointCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $categoryId)
+    public function update(int $categoryId)
     {
         $user = auth()->user();
 
@@ -99,13 +94,8 @@ class UserPointCategoryController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $validated = $request->validate([
-            'current_point' => 'required',
-            'total_point' => 'required',
-        ]);
-
-        $userPointCategory->update($validated);
+        
+        $userPointCategory->update();
 
         return response()->json($userPointCategory);
     }
