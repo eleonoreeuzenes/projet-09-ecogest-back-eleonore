@@ -49,6 +49,7 @@ class PostService
         $posts = Post::where('title','ILIKE','%'.$q.'%')
             ->orWhere('description','ILIKE','%'.$q.'%')
             ->orWhere('tag','ILIKE','%'.$q.'%')
+            ->take(10)
             ->get();
         
             return $posts ;
