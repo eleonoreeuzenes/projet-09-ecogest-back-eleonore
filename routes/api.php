@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\UserController;
@@ -59,6 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/{userId}/posts/abandoned', [UserPostParticipationController::class, 'getPostsByUserAbandoned']);
     Route::get('users/{userId}/posts/next', [UserPostParticipationController::class, 'getPostsByUserNext']);
     Route::get('users/{userId}/posts', [UserPostParticipationController::class, 'getPostsByUser']);
+
+    //Search
+    Route::get('/search/{q}', [SearchController::class, 'getResult']);
 
     // API business routes
     Route::apiResources([
