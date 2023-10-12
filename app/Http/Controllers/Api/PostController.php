@@ -24,7 +24,7 @@ class PostController extends Controller
             $post->category;
             $post->like; 
             $post->comment;
-            $post->user;
+            $post->user->badge;
         }
 
         return response()->json($posts);
