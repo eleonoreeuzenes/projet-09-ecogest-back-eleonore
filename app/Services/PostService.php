@@ -30,7 +30,7 @@ class PostService
 
     public static function createUserPointCategoryWithZeroPoint(Post $post, int $partcipantId)
     {
-        $userPointCategoryAlreadyExists = UserPointCategory::where(['user_id' => $partcipantId, 'category_id' =>$post->category_id])->count();
+        $userPointCategoryAlreadyExists = UserPointCategory::where(['user_id' => $partcipantId, 'category_id' => $post->category_id])->count();
         if ($userPointCategoryAlreadyExists == 0) {
             $userPointCategory = UserPointCategory::create([
                 'user_id' => $partcipantId,
@@ -43,15 +43,25 @@ class PostService
         }
     }
 
-    public static function searchByTitleOrDescriptionOrTag(String $q)
+    public static function searchByTitleOrDescriptionOrTag(string $q)
     {
         // Participant lists with details
-        $posts = Post::where('title','ILIKE','%'.$q.'%')
-            ->orWhere('description','ILIKE','%'.$q.'%')
-            ->orWhere('tag','ILIKE','%'.$q.'%')
+        $posts = Post::where('title', 'ILIKE', '%' . $q . '%')
+            ->orWhere('description', 'ILIKE', '%' . $q . '%')
+            ->orWhere('tag', 'ILIKE', '%' . $q . '%')
             ->take(10)
             ->get();
-        
-            return $posts ;
+
+        foreach ($posts as $post) {
+            foreach ($post->userPostParticipation as $userPostParticipation) {
+                $userPostParticipation->users;
+            }
+            $post->category;
+            $post->like;
+            $post->comment;
+            $post->user->badge;
+        }
+
+        return $posts;
     }
 }
