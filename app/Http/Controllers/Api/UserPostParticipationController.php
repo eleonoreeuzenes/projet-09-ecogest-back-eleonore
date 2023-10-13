@@ -142,8 +142,7 @@ class UserPostParticipationController extends Controller
         $trophy = Reward::where('type', 'trophy')->firstOrFail();
         $userPointCategory = UserPointCategory::where(['user_id' => $user->id, 'category_id' => $post->category_id])->firstOrFail();
 
-        UserPointService::updateUserCurrentPointCategory($post, $userPointCategory, $trophy);
-        UserPointService::updateUserTotalPointCategory($post, $userPointCategory);
+        UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
 
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);

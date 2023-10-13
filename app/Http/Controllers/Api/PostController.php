@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Reward;
+use App\Models\User;
 use App\Services\PostService;
 use App\Models\Category;
+use App\Services\UserPointService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\UserPointCategory;
+use App\Models\UserTrophy;
 
 class PostController extends Controller
 {
@@ -22,7 +27,7 @@ class PostController extends Controller
                 $userPostParticipation->users;
             }
             $post->category;
-            $post->like; 
+            $post->like;
             $post->comment;
             $post->user->badge;
         }
@@ -74,6 +79,12 @@ class PostController extends Controller
         $post = Post::create($validated);
         PostService::addAuthorPostToUserPostParticipation($post);
 
+        $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
+        UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
+
+        $userModel = User::where('id', $user->id)->firstOrFail();
+        UserPointService::setNewBadge($userModel);
+        
         $post->save();
         return response()->json($validated);
     }
@@ -100,7 +111,7 @@ class PostController extends Controller
             $userPostParticipation->users;
         }
         $post->category;
-        $post->like; 
+        $post->like;
         $post->comment;
         $post->user;
 
