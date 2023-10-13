@@ -61,10 +61,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('posts/comments/{id}', [CommentController::class, 'destroy']);
     
     
-    Route::get('users/{userId}/posts/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
-    Route::get('users/{userId}/posts/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
-    Route::get('users/{userId}/posts/abandoned', [UserPostParticipationController::class, 'getPostsByUserAbandoned']);
-    Route::get('users/{userId}/posts/next', [UserPostParticipationController::class, 'getPostsByUserNext']);
+    Route::get('users/{userId}/actions', [UserPostParticipationController::class, 'getUserActions']);
+    Route::get('users/{userId}/challenges/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
+    Route::get('users/{userId}/challenges/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
+    Route::get('users/{userId}/challenges/abandoned', [UserPostParticipationController::class, 'getPostsByUserAbandoned']);
+    Route::get('users/{userId}/challenges/next', [UserPostParticipationController::class, 'getPostsByUserNext']);
     Route::get('users/{userId}/posts', [UserPostParticipationController::class, 'getPostsByUser']);
 
     // API business routes
