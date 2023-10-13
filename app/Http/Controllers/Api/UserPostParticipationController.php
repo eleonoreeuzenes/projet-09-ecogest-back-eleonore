@@ -314,7 +314,7 @@ class UserPostParticipationController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
         $userActions = [];
 
         foreach ($userPostParticipations as $userPostParticipation) {
