@@ -42,4 +42,16 @@ class PostService
             $userPointCategory->save();
         }
     }
+
+    public static function searchByTitleOrDescriptionOrTag(String $q)
+    {
+        // Participant lists with details
+        $posts = Post::where('title','ILIKE','%'.$q.'%')
+            ->orWhere('description','ILIKE','%'.$q.'%')
+            ->orWhere('tag','ILIKE','%'.$q.'%')
+            ->take(10)
+            ->get();
+        
+            return $posts ;
+    }
 }
