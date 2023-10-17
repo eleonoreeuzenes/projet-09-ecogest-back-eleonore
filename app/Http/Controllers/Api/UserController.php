@@ -31,8 +31,6 @@ class UserController extends Controller
       return response()->json(['error' => 'User not found.'], 404);
     }
 
-    
-
     $user->badge;
     $user->userTrophy;
     $user->userPostParticipation;
