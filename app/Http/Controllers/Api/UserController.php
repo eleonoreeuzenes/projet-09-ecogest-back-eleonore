@@ -34,6 +34,29 @@ class UserController extends Controller
     $user->badge;
     $user->userTrophy;
     $user->userPostParticipation;
+    $user->follower->load('follower');
+    $user->following->load('following');
+
+    return response()->json($user);
+  }
+
+  public function show(int $userId)
+  {
+    $userAuthenticated = $this->getUser();
+
+    $user = User::where('id', $userId)->first();
+
+    if (!$user) {
+      return response()->json(['error' => 'User not found.'], 404);
+    }
+
+    if ($userAuthenticated->following->load('following')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private) {
+      $user->badge;
+      $user->userTrophy;
+      $user->userPostParticipation;
+      $user->follower->load('follower');
+      $user->following->load('following');
+    }
 
     return response()->json($user);
   }

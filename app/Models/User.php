@@ -76,14 +76,14 @@ class User extends Authenticatable
         return $this->hasMany(UserTrophy::class, 'user_id');
     }
 
-    public function follower()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
     public function following()
     {
-        return $this->hasMany(Subscription::class);
+        return $this->hasMany(Subscription::class, 'follower_id');
+    }
+
+    public function follower()
+    {
+        return $this->hasMany(Subscription::class, 'following_id');
     }
 
     public function like()

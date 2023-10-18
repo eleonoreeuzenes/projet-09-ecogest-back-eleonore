@@ -20,19 +20,26 @@ class PostController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+
         $posts = Post::orderBy('created_at', 'DESC')->paginate(30);
 
+        $postsOfUserCommunity = [];
+
         foreach ($posts as $post) {
-            foreach ($post->userPostParticipation as $userPostParticipation) {
-                $userPostParticipation->users;
+            if ($user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->is_private == true || $user->id == $post->author_id) {
+                foreach ($post->userPostParticipation as $userPostParticipation) {
+                    $userPostParticipation->users;
+                }
+                $post->category;
+                $post->like;
+                $post->comment;
+                $post->user->badge;
+                $postsOfUserCommunity[] = $post;
             }
-            $post->category;
-            $post->like;
-            $post->comment;
-            $post->user->badge;
         }
 
-        return response()->json($posts);
+        return response()->json($postsOfUserCommunity);
     }
 
     /**
@@ -84,7 +91,7 @@ class PostController extends Controller
 
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);
-        
+
         $post->save();
         return response()->json($validated);
     }
@@ -101,10 +108,15 @@ class PostController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
+
         $post = Post::where('id', $id)->firstOrFail();
 
         if (!$post) {
             return response()->json(['error' => 'Post not found.'], 404);
+        }
+
+        if ((!$user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->is_private == true) && $user->id != $post->author_id) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         foreach ($post->userPostParticipation as $userPostParticipation) {

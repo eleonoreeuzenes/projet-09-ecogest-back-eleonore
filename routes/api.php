@@ -46,6 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/me', [UserController::class, 'update']);
     Route::delete('/me', [UserController::class, 'destroy']);
 
+    // other user
+    Route::get('users/{userId}', [UserController::class, 'show']);
+
     // User post participation
     Route::get('posts/{postId}/participants', [UserPostParticipationController::class, 'getParticipantsByPostId']);
     Route::post('posts/{postId}/participants', [UserPostParticipationController::class, 'store']);
@@ -60,7 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('posts/{postId}/comments', [CommentController::class, 'store']);
     Route::patch('posts/comments/{id}', [CommentController::class, 'update']);
     Route::delete('posts/comments/{id}', [CommentController::class, 'destroy']);
-    
     
     Route::get('users/{userId}/actions', [UserPostParticipationController::class, 'getUserActions']);
     Route::get('users/{userId}/challenges/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
