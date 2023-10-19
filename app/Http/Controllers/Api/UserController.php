@@ -34,8 +34,8 @@ class UserController extends Controller
     $user->badge;
     $user->userTrophy;
     $user->userPostParticipation;
-    $user->follower->load('follower');
-    $user->following->load('following');
+    $user->follower; 
+    $user->following;
 
     return response()->json($user);
   }
@@ -54,8 +54,8 @@ class UserController extends Controller
       $user->badge;
       $user->userTrophy;
       $user->userPostParticipation;
-      $user->follower->load('follower');
-      $user->following->load('following');
+      $user->follower;
+      $user->following; 
     }
 
     return response()->json($user);

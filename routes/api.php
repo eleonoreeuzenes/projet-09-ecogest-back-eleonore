@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPointCategoryController;
 use App\Http\Controllers\Api\UserPostParticipationController;
 use App\Http\Controllers\Api\UserTrophyController;
+use App\Http\Controllers\Api\SubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Knuckles\Scribe\Attributes\Header;
@@ -73,6 +74,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Search
     Route::get('/search/{q}', [SearchController::class, 'getResult']);
+
+    Route::post('users/{userId}/subscribe', [SubscriptionController::class, 'subscribe']);
+    Route::delete('users/{userId}/unsubscribe', [SubscriptionController::class, 'unSubscribe']);
+    Route::post('users/{userId}/accept-subscription-request', [SubscriptionController::class, 'acceptSubscriptionRequest']);
+
+
 
     // API business routes
     Route::apiResources([
