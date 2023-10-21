@@ -50,10 +50,17 @@ class UserController extends Controller
       return response()->json(['error' => 'User not found.'], 404);
     }
 
-    if ($userAuthenticated->following->load('following')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private) {
+    if ($userAuthenticated->following->load('following')->where('status', 'approved')->contains('following_id', $userId) || !$user->is_private) {
       $user->badge;
       $user->userTrophy;
       $user->userPostParticipation;
+      $user->follower;
+      $user->following; 
+    }
+    else {
+      $user->badge;
+      $user->userTrophy = [];
+      $user->userPostParticipation = [];
       $user->follower;
       $user->following; 
     }

@@ -78,8 +78,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('users/{userId}/subscribe', [SubscriptionController::class, 'subscribe']);
     Route::delete('users/{userId}/unsubscribe', [SubscriptionController::class, 'unSubscribe']);
     Route::post('users/{userId}/accept-subscription-request', [SubscriptionController::class, 'acceptSubscriptionRequest']);
-
-
+    Route::delete('users/{userId}/decline-subscription-request', [SubscriptionController::class, 'declineSubscriptionRequest']);
+    Route::delete('users/{userId}/cancel-subscription-request', [SubscriptionController::class, 'cancelSubscriptionRequest']);
 
     // API business routes
     Route::apiResources([

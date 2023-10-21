@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use Illuminate\Http\Request;
+
 use App\Models\Subscription;
 
 class SubscriptionController extends Controller
@@ -63,7 +65,49 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Decline a subscription
+     * Accept a subscription
+     */
+
+    public function acceptSubscriptionRequest(int $userId)
+    {
+        $userAuthenticated = auth()->user();
+        if (!$userAuthenticated) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $subscription = Subscription::where(['following_id' => $userAuthenticated->id, 'follower_id' => $userId, 'status' => 'pending'])->firstOrFail();
+        if ($subscription->count() == 0) {
+            return response()->json(['error' => 'Subscription request not found.'], 404);
+        }
+
+        $subscription->status = 'approved';
+        $subscription->save();
+        return response()->json($subscription);
+    }
+
+    /**
+     * Cancel a subscription
+     */
+
+    public function cancelSubscriptionRequest(int $userId)
+    {
+        $userAuthenticated = auth()->user();
+        if (!$userAuthenticated) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $subscription = Subscription::where(['following_id' => $userAuthenticated->id, 'follower_id' => $userId, 'status' => 'pending']);
+        if ($subscription->count() == 0) {
+            return response()->json(['error' => 'Subscription request not found.'], 404);
+        }
+
+        $subscription->delete();
+        return response()->json('Subscription request canceled');
+    }
+
+
+    /**
+     * Accept a subscription
      */
 
     public function declineSubscriptionRequest(int $userId)
@@ -77,31 +121,9 @@ class SubscriptionController extends Controller
         if ($subscription->count() == 0) {
             return response()->json(['error' => 'Subscription request not found.'], 404);
         }
-
-        $subscription->status ='approved';
-        $subscription->save();
-        return response()->json($subscription);
+        $subscription->delete();
+        return response()->json('Subscription request declined');
     }
 
-
-    /**
-     * Accept a subscription
-     */
-
-     public function acceptSubscriptionRequest(int $userId)
-     {
-         $userAuthenticated = auth()->user();
-         if (!$userAuthenticated) {
-             return response()->json(['error' => 'User not found.'], 404);
-         }
- 
-         $subscription = Subscription::where(['following_id' => $userAuthenticated->id, 'follower_id' => $userId, 'status' => 'pending']);
-         if ($subscription->count() == 0) {
-             return response()->json(['error' => 'Subscription request not found.'], 404);
-         }
-         $subscription->delete();
-         return response()->json('Subscription request declined');
-     }
- 
 
 }
