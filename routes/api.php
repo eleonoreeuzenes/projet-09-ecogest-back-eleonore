@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPointCategoryController;
 use App\Http\Controllers\Api\UserPostParticipationController;
 use App\Http\Controllers\Api\UserTrophyController;
+use App\Http\Controllers\Api\SubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Knuckles\Scribe\Attributes\Header;
@@ -46,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/me', [UserController::class, 'update']);
     Route::delete('/me', [UserController::class, 'destroy']);
 
+    // other user
+    Route::get('users/{userId}', [UserController::class, 'show']);
+
     // User post participation
     Route::get('posts/{postId}/participants', [UserPostParticipationController::class, 'getParticipantsByPostId']);
     Route::post('posts/{postId}/participants', [UserPostParticipationController::class, 'store']);
@@ -61,7 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('posts/comments/{id}', [CommentController::class, 'update']);
     Route::delete('posts/comments/{id}', [CommentController::class, 'destroy']);
     
-    
     Route::get('users/{userId}/actions', [UserPostParticipationController::class, 'getUserActions']);
     Route::get('users/{userId}/challenges/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
     Route::get('users/{userId}/challenges/in-progress', [UserPostParticipationController::class, 'getPostsByUserInProgress']);
@@ -71,6 +74,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Search
     Route::get('/search/{q}', [SearchController::class, 'getResult']);
+
+    Route::post('users/{userId}/subscribe', [SubscriptionController::class, 'subscribe']);
+    Route::delete('users/{userId}/unsubscribe', [SubscriptionController::class, 'unSubscribe']);
+    Route::post('users/{userId}/accept-subscription-request', [SubscriptionController::class, 'acceptSubscriptionRequest']);
+    Route::delete('users/{userId}/decline-subscription-request', [SubscriptionController::class, 'declineSubscriptionRequest']);
+    Route::delete('users/{userId}/cancel-subscription-request', [SubscriptionController::class, 'cancelSubscriptionRequest']);
 
     // API business routes
     Route::apiResources([

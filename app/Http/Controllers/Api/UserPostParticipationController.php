@@ -139,7 +139,6 @@ class UserPostParticipationController extends Controller
         $userPostParticipation->is_completed = true;
 
         $post = Post::where('id', $postId)->firstOrFail();
-        $trophy = Reward::where('type', 'trophy')->firstOrFail();
         $userPointCategory = UserPointCategory::where(['user_id' => $user->id, 'category_id' => $post->category_id])->firstOrFail();
 
         UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
@@ -162,6 +161,11 @@ class UserPostParticipationController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
+        }
+
         $userPostParticipations = UserPostParticipation::where('participant_id', $user->id)->get();
         $userPostParticipations->load('posts');
         return response()->json($userPostParticipations);
@@ -175,6 +179,11 @@ class UserPostParticipationController extends Controller
         $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
@@ -206,6 +215,11 @@ class UserPostParticipationController extends Controller
         $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -243,6 +257,11 @@ class UserPostParticipationController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
+        }
+
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
         $userPostParticipations->load('posts')->where('type', "challenge");
 
@@ -261,7 +280,7 @@ class UserPostParticipationController extends Controller
                     $post->like;
                     $post->comment;
                     $post->user;
-                    $userPostParticipationsInProgress[]  = $post;
+                    $userPostParticipationsInProgress[] = $post;
                 }
             }
         }
@@ -277,6 +296,12 @@ class UserPostParticipationController extends Controller
         $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userAuthenticated = auth()->user();
+
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -296,7 +321,7 @@ class UserPostParticipationController extends Controller
                     $post->like;
                     $post->comment;
                     $post->user;
-                    $userPostParticipationsNext[]  = $post;
+                    $userPostParticipationsNext[] = $post;
                 }
             }
         }
@@ -311,6 +336,11 @@ class UserPostParticipationController extends Controller
         $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();

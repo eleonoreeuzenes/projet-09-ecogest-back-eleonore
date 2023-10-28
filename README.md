@@ -5,6 +5,7 @@
 
 `cp .env.example .env`
 
+## Ajouter un mdp dans le .env
 
 ## Lancer docker
 

@@ -16,6 +16,12 @@ class UserPointCategoryController extends Controller
     public function index(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
+
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
+        }
+
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
@@ -73,6 +79,11 @@ class UserPointCategoryController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
+        $userAuthenticated = auth()->user();
+        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
+            return response()->json(['error' => 'User private'], 400);
+        }
+
         $userPointCategory = UserPointCategory::where(['user_id' => $user->id, 'category_id' => $categoryId])->first();
 
         if (!$userPointCategory) {
@@ -94,7 +105,7 @@ class UserPointCategoryController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-        
+
         $userPointCategory->update();
 
         return response()->json($userPointCategory);

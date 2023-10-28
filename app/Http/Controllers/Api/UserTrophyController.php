@@ -21,6 +21,11 @@ class UserTrophyController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
+        $userAuthenticated = auth()->user();
+        if (!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) {
+            return response()->json(['error' => 'User private'], 400);
+        }
+
         $userTrophies = UserTrophy::where('user_id', $user->id)->get();
 
         if (!$userTrophies) {
@@ -70,6 +75,11 @@ class UserTrophyController extends Controller
         $user = User::where('id', $userId)->firstOrFail();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        $userAuthenticated = auth()->user();
+        if (!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userTrophy = UserTrophy::where(['user_id' => $user->id, 'category_id' => $categoryId])->first();
