@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserTrophy;
 use Illuminate\Http\Request;
@@ -17,20 +18,22 @@ class UserTrophyController extends Controller
     public function index(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if (!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
-
+        
         $userTrophies = UserTrophy::where('user_id', $user->id)->get();
 
         if (!$userTrophies) {
             return response()->json(['error' => 'Trophy of user not found.'], 404);
-
         }
 
         foreach ($userTrophies as $userTrophy) {
@@ -73,13 +76,16 @@ class UserTrophyController extends Controller
     public function show(int $userId, int $categoryId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if (!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userTrophy = UserTrophy::where(['user_id' => $user->id, 'category_id' => $categoryId])->first();

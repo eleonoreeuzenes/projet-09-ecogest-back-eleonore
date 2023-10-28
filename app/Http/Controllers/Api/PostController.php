@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Reward;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Services\PostService;
 use App\Models\Category;
@@ -27,7 +28,7 @@ class PostController extends Controller
         $postsOfUserCommunity = [];
 
         foreach ($posts as $post) {
-            if ($user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->is_private == true || $user->id == $post->author_id) {
+            if ($user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->id == $post->author_id) {
                 foreach ($post->userPostParticipation as $userPostParticipation) {
                     $userPostParticipation->users;
                 }
@@ -103,11 +104,17 @@ class PostController extends Controller
     public function show(int $id)
     {
         $user = auth()->user();
-
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
+        }
 
         $post = Post::where('id', $id)->firstOrFail();
 
