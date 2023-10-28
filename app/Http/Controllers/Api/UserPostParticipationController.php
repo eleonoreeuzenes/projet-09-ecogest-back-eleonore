@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Reward;
+use App\Models\Subscription;
 use App\Models\UserPostParticipation;
 use App\Services\PostService;
 use App\Services\UserPointService;
@@ -80,9 +81,16 @@ class UserPostParticipationController extends Controller
     public function show(int $id)
     {
         $user = auth()->user();
-
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipation = UserPostParticipation::where(['participant_id' => $user->id, 'id' => $id])->first();
@@ -157,13 +165,16 @@ class UserPostParticipationController extends Controller
     public function getPostsByUser(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where('participant_id', $user->id)->get();
@@ -177,13 +188,16 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserCompleted(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
@@ -213,13 +227,16 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserAbandoned(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -253,13 +270,16 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserInProgress(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -294,14 +314,16 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserNext(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -334,13 +356,16 @@ class UserPostParticipationController extends Controller
     public function getUserActions(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
-        $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();

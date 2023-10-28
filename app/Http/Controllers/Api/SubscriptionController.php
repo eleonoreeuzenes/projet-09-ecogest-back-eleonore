@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 use App\Models\Subscription;
@@ -124,6 +125,4 @@ class SubscriptionController extends Controller
         $subscription->delete();
         return response()->json('Subscription request declined');
     }
-
-
 }
