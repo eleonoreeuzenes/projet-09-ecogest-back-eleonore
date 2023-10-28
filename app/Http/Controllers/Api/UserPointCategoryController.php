@@ -26,7 +26,7 @@ class UserPointCategoryController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1  && $userId != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -88,7 +88,7 @@ class UserPointCategoryController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1  && $userId != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
