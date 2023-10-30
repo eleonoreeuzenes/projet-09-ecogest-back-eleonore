@@ -57,6 +57,7 @@ class PostService
                 $userPostParticipation->users;
             }
             $post->category;
+            $post->tag;
             $post->like;
             $post->comment;
             $post->user->badge;

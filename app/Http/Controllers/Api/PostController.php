@@ -33,6 +33,7 @@ class PostController extends Controller
                     $userPostParticipation->users;
                 }
                 $post->category;
+                $post->tags;
                 $post->like;
                 $post->comment;
                 $post->user->badge;
@@ -131,6 +132,7 @@ class PostController extends Controller
         }
         $post->category;
         $post->like;
+        $post->tags;
         $post->comment;
         $post->user;
 
