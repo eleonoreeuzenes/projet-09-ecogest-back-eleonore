@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserPointCategory;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use App\Models\Category;
 
 class UserPointCategoryController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
@@ -18,12 +20,15 @@ class UserPointCategoryController extends Controller
         $user = User::where('id', $userId)->firstOrFail();
 
         $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
-        }
-
-        if (!$user) {
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1  && $userId != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPointCategory = UserPointCategory::where('user_id', $userId)->get();
@@ -75,13 +80,17 @@ class UserPointCategoryController extends Controller
     public function show(int $userId, int $categoryId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
 
         $userAuthenticated = auth()->user();
-        if ((!$userAuthenticated->following->load('follower')->where('status', 'approved')->contains('following_id', $userId) || $user->is_private == true) && $user->id != $userAuthenticated->id) {
-            return response()->json(['error' => 'User private'], 400);
+        
+        if (!$userAuthenticated || !$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1  && $userId != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPointCategory = UserPointCategory::where(['user_id' => $user->id, 'category_id' => $categoryId])->first();

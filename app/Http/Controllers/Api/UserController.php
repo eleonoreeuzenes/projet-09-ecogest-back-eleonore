@@ -34,7 +34,7 @@ class UserController extends Controller
     $user->badge;
     $user->userTrophy;
     $user->userPostParticipation;
-    $user->follower; 
+    $user->follower;
     $user->following;
 
     return response()->json($user);
@@ -50,19 +50,18 @@ class UserController extends Controller
       return response()->json(['error' => 'User not found.'], 404);
     }
 
-    if ($userAuthenticated->following->load('following')->where('status', 'approved')->contains('following_id', $userId) || !$user->is_private) {
+    if ($userAuthenticated->following->load('following')->where('status', 'approved')->contains('following_id', $userId) || !$user->is_private || $userId == $userAuthenticated->id) {
       $user->badge;
       $user->userTrophy;
       $user->userPostParticipation;
       $user->follower;
-      $user->following; 
-    }
-    else {
+      $user->following;
+    } else {
       $user->badge;
       $user->userTrophy = [];
       $user->userPostParticipation = [];
       $user->follower;
-      $user->following; 
+      $user->following;
     }
 
     return response()->json($user);
@@ -80,14 +79,14 @@ class UserController extends Controller
 
 
     $validated = $request->validate([
-      'email' => 'string|email',
+      'email' => 'nullable|string|email',
       'username' => 'nullable|string|max:255',
       'image' => 'nullable|string|max:255',
-      'badge_id' => 'integer',
-      'birthdate' => 'nullable|date_format:d/m/Y',
+      'badge_id' => 'nullable|integer',
+      'birthdate' => 'nullable|date',
       'biography' => 'nullable|string',
       'position' => 'nullable|string|max:255',
-      "is_private" => 'boolean'
+      "is_private" => 'nullable|boolean'
     ]);
 
     $user->update($validated);
