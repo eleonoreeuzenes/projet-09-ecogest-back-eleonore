@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
+use App\Http\Controllers\Api\NotificationsController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserPointCategoryController;
 use App\Http\Controllers\Api\UserPostParticipationController;
@@ -80,6 +81,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('users/{userId}/accept-subscription-request', [SubscriptionController::class, 'acceptSubscriptionRequest']);
     Route::delete('users/{userId}/decline-subscription-request', [SubscriptionController::class, 'declineSubscriptionRequest']);
     Route::delete('users/{userId}/cancel-subscription-request', [SubscriptionController::class, 'cancelSubscriptionRequest']);
+
+    // notifications 
+    Route::get('/me/notifications', [NotificationsController::class, 'index']);
+
 
     // API business routes
     Route::apiResources([
