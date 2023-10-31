@@ -61,7 +61,6 @@ class PostController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|integer',            
             "tags" => "nullable|array",
-            "tags.*" => "nullable|string",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
@@ -100,8 +99,8 @@ class PostController extends Controller
         $post->save();
           
         // If user adds tags
-        if ($request->input('tags')) {
-            $tagsToAttach = TagService::addTagsToPost($request->input('tags'));
+        if ($validated['tags']) {
+            $tagsToAttach = TagService::addTagsToPost($validated['tags']);
             $post->tags()->attach($tagsToAttach);
         }
 
@@ -209,7 +208,19 @@ class PostController extends Controller
 
     public function getPostsByTag(string $tag)
     {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return response()->json([
+                'message' => 'User not found.'
+            ], 404);
+        }
+
         $posts = PostService::getPostsByTag($tag);
-        response()->json($posts);
+
+        if ($posts === null) {
+            return response()->json(['error' => 'Tag not found.'], 404);
+        }
+        return response()->json($posts);
     }
 }

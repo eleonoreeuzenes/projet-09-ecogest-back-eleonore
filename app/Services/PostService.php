@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\UserPointCategory;
 use App\Models\UserPostParticipation;
 use DateTime;
@@ -66,13 +67,13 @@ class PostService
         return $posts;
     }
 
-    public function getPostsByTag(string $tag)
+    public static function getPostsByTag(string $tag)
     {
         // Posts qui contiennent le tag suivant 
         $tagModel = Tag::where('label', $tag)->first();
 
         if (!$tagModel) {
-            return response()->json(['error' => 'Tag not found.'], 404);
+            return null;
         }
         return $tagModel->posts;
 

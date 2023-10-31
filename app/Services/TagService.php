@@ -11,18 +11,18 @@ use DateTime;
 
 class TagService
 {
-    public function addTagsToPost(array $tags)
+    public static function addTagsToPost(array $tags)
     {
         $allTags = Tag::get();
         $newTags = [];
         $tagsToAttach = [];
         
         foreach ($tags as $tag) {
-            if (!in_array($tag, $allTags->pluck('label')->toArray())) {
-                $newTag = Tag::create(['label' => $tag]);
+            if (!in_array($tag['label'], $allTags->pluck('label')->toArray())) {
+                $newTag = Tag::create(['label' => $tag['label']]);
                 $tagsToAttach[] = $newTag->id;
             } else {
-                $tagsToAttach[] = $allTags->where('label', $tag)->first()->id;
+                $tagsToAttach[] = $allTags->where('label', $tag['label'])->first()->id;
             }
         }
         
@@ -43,7 +43,7 @@ class TagService
         return $tagsToAttach;
     }
 
-    public function updateTagsToPost(array $oldTags, array $updatedTags)
+    public static function updateTagsToPost(array $oldTags, array $updatedTags)
     {
         $tagsToAttach = addTagsToPost($updatedTags);
         $tagsToDetach = [];

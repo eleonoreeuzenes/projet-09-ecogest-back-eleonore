@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 class Tag extends Model
 {
     use HasFactory;
-
-    public $timestamp = false;
     /**
      * The attributes that are mass assignable.
      *
@@ -23,6 +21,6 @@ class Tag extends Model
 
     public function posts()
     {
-        return $this->belongsToMany(Post::class, 'tag_post', 'post_id', 'tag_id');
+        return $this->belongsToMany(Post::class, 'tag_post', 'tag_id', 'post_id');
     }
 }
