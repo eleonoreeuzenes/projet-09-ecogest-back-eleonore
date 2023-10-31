@@ -36,7 +36,7 @@ class LikeController extends Controller
 
         $like->save();
 
-        $post->user->notify(new PostLiked($post));
+        $post->user->notify(new PostLiked($like));
 
         return response()->json($like);
     }

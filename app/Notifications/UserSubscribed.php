@@ -2,25 +2,24 @@
 
 namespace App\Notifications;
 
-use App\Models\Like;
-use App\Models\Post;
+use App\Models\Subscription;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PostLiked extends Notification
+class UserSubscribed extends Notification
 {
     use Queueable;
 
-    public $like;
+    public $subscription;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Like $like)
+    public function __construct(Subscription $subscription)
     {
-        $this->like = $like;
+        $this->subscription = $subscription;
     }
 
     /**
@@ -39,9 +38,9 @@ class PostLiked extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('The introduction to the notification.')
+            ->action('Notification Action', url('/'))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -52,7 +51,7 @@ class PostLiked extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'like_id' => $this->like->id,
+            'subscription_id' => $this->subscription->id,
         ];
     }
 }

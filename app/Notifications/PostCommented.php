@@ -2,25 +2,25 @@
 
 namespace App\Notifications;
 
-use App\Models\Like;
+use App\Models\Comment;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PostLiked extends Notification
+class PostCommented extends Notification
 {
     use Queueable;
 
-    public $like;
-
+    public $comment;
     /**
      * Create a new notification instance.
      */
-    public function __construct(Like $like)
+    public function __construct(Comment $comment)
     {
-        $this->like = $like;
+        $this->comment = $comment;
     }
 
     /**
@@ -39,9 +39,9 @@ class PostLiked extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('The introduction to the notification.')
+            ->action('Notification Action', url('/'))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -52,7 +52,14 @@ class PostLiked extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'like_id' => $this->like->id,
+            'comment_id' => $this->comment->id,
         ];
+    }
+
+    public function toBroadcast($notifiable)
+    {
+        return new BroadcastMessage([
+            'comment_id' => $this->comment->id,
+        ]);
     }
 }

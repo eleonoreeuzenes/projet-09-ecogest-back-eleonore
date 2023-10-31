@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\User;
+use App\Notifications\UserSubscribed;
 use Illuminate\Http\Request;
 
 use App\Models\Subscription;
@@ -21,7 +22,7 @@ class SubscriptionController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $userAlreadySubscribed = Subscription::where(['follower_id' => $userAuthenticated->id, 'following_id' => $userId])
+        $userAlreadySubscribed = Subscription::where(['follower_id' => $userAuthenticated->id, 'follow_id' => $userId])
             ->where(function ($query) {
                 $query->where('status', 'approved')->orWhere('status', 'pending');
             });
@@ -39,6 +40,8 @@ class SubscriptionController extends Controller
             'following_id' => $userId,
             'status' => 'pending',
         ]);
+        $user = User::where('id', $userId)->first();
+        $user->notify(new UserSubscribed($subscription));
 
         $subscription->save();
         return response()->json($subscription);
@@ -80,6 +83,9 @@ class SubscriptionController extends Controller
         if ($subscription->count() == 0) {
             return response()->json(['error' => 'Subscription request not found.'], 404);
         }
+
+        $user = User::where('id', $userAuthenticated->id)->first();
+        $user->notify(new UserSubscribed($subscription));
 
         $subscription->status = 'approved';
         $subscription->save();
