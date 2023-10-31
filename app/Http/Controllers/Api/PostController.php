@@ -218,6 +218,18 @@ class PostController extends Controller
 
         $posts = PostService::getPostsByTag($tag);
 
+        foreach ($posts as $post) {
+            $post->category;
+            $post->like;
+            $post->setHidden(["pivot"]);
+            $post->tags->setHidden([
+                "created_at",
+                "updated_at",
+                "pivot"]);
+            $post->comment;
+            $post->user;
+        }
+
         if ($posts === null) {
             return response()->json(['error' => 'Tag not found.'], 404);
         }
