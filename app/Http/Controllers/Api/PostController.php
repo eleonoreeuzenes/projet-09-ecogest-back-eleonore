@@ -168,8 +168,7 @@ class PostController extends Controller
         $post = Post::where('id', $id)->firstOrFail();
 
         $validated = $request->validate([
-            "tag" => "array",
-            "tag.*" => "nullable|string",
+            "tags" => "nullable|array",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
@@ -186,14 +185,11 @@ class PostController extends Controller
             }
         }
 
+        if ($validated['tags']) {
+            $post = TagService::updateTagsToPost($post, $validated['tags']);
+        }
         $post->update($validated);
         
-        if ($request->input('tags')) {
-            $tagsToUpdate = TagService::updateTagsToPost($oldTags, $request->input('tags'));
-            $post->tags()->detach($tagsToUpdate['detach']);
-            $post->tags()->attach($tagsToUpdate['attach']);
-        }
-
         return response()->json($post);
     }
 

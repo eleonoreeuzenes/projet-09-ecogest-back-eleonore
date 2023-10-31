@@ -43,20 +43,41 @@ class TagService
         return $tagsToAttach;
     }
 
-    public static function updateTagsToPost(array $oldTags, array $updatedTags)
+    public static function updateTagsToPost(Post $post, array $updatedTags)
     {
-        $tagsToAttach = addTagsToPost($updatedTags);
+        $oldTags = []; //
+        $newTags = self::addTagsToPost($updatedTags); // 1, 3, 8
         $tagsToDetach = [];
-        
-        foreach ($oldTags as $tag) {
-            if (!in_array($tag, $tagsToAttach)) {
-                $tagsToDetach[] = $tag;
+        $tagsToAttach = [];
+
+        // dd($updatedTags); 
+        foreach (($post->tags)->toArray() as $tag) {
+            $oldTags[] = $tag['id'];
+            if (!in_array($tag['id'], $newTags)) {
+                $tagsToDetach[] = $tag['id'];
+            }
+        }
+
+        foreach ($newTags as $newTag => $newId) {
+            if (!in_array($newId, $oldTags)) {
+                $tagsToAttach[] = $newId;
             }
         }
 
         $tagsToUpdate = array('attach' => $tagsToAttach, 'detach' => $tagsToDetach);
 
-        return $tagsToUpdate;
+        $post->tags()->attach($tagsToUpdate['attach']);
+        $post->tags()->detach($tagsToUpdate['detach']);
+        $postUpdated = $post;
+
+        return $postUpdated;
     }
 
+    public static function getTagsByPost(Post $post)
+    {
+        $tags = $post->tags;
+        if ($tags != null) {
+            return $tags;
+        }
+    }
 }

@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('posts/comments/{id}', [CommentController::class, 'update']);
     Route::delete('posts/comments/{id}', [CommentController::class, 'destroy']);
 
-    Route::get('/posts/{tag}', [PostController::class, 'getPostsByTag']);
+    Route::get('/posts-by-tag/{tag}', [PostController::class, 'getPostsByTag']);
     
     Route::get('users/{userId}/actions', [UserPostParticipationController::class, 'getUserActions']);
     Route::get('users/{userId}/challenges/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
@@ -90,6 +90,5 @@ Route::middleware('auth:sanctum')->group(function () {
         'categories'  => CategoryController::class, 
         'users/{userId}/categories-points'  => UserPointCategoryController::class, // user points in categories
         'users/{userId}/trophies'  => UserTrophyController::class, // user trophies
-        'tags'        => TagController::class, // tags
     ]);
 });
