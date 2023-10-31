@@ -6,6 +6,7 @@ use App\Models\Reward;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\PostService;
+use App\Services\TagService;
 use App\Models\Category;
 use App\Services\UserPointService;
 use Illuminate\Http\Request;
@@ -33,7 +34,10 @@ class PostController extends Controller
                     $userPostParticipation->users;
                 }
                 $post->category;
-                $post->tags;
+                $post->tags->setHidden([
+                    "created_at",
+                    "updated_at",
+                    "pivot"]);
                 $post->like;
                 $post->comment;
                 $post->user->badge;
@@ -55,9 +59,9 @@ class PostController extends Controller
         }
 
         $validated = $request->validate([
-            'category_id' => 'required|integer',
-            "tag" => "nullable|array",
-            "tag.*" => "nullable|string",
+            'category_id' => 'required|integer',            
+            "tags" => "nullable|array",
+            "tags.*" => "nullable|string",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
@@ -81,20 +85,26 @@ class PostController extends Controller
 
         $validated['author_id'] = $user->id;
         $validated['category_id'] = $category->id;
-        if ($request['tag']) {
-            $validated['tag'] = implode($request['tag.*']);
-            // it's a solution to convert string to array from laravel to postgresql
-        }
+       
+
         $post = Post::create($validated);
         PostService::addAuthorPostToUserPostParticipation($post);
 
+        
         $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
         UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
-
+        
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);
 
         $post->save();
+          
+        // If user adds tags
+        if ($request->input('tags')) {
+            $tagsToAttach = TagService::addTagsToPost($request->input('tags'));
+            $post->tags()->attach($tagsToAttach);
+        }
+
         return response()->json($validated);
     }
 
@@ -132,7 +142,10 @@ class PostController extends Controller
         }
         $post->category;
         $post->like;
-        $post->tags;
+        $post->tags->setHidden([
+            "created_at",
+            "updated_at",
+            "pivot"]);
         $post->comment;
         $post->user;
 
@@ -174,12 +187,13 @@ class PostController extends Controller
             }
         }
 
-        if ($request['tag']) {
-            $validated['tag'] = implode($request['tag.*']);
-            // it's a solution to convert string to array from laravel to postgresql
-        }
-
         $post->update($validated);
+        
+        if ($request->input('tags')) {
+            $tagsToUpdate = TagService::updateTagsToPost($oldTags, $request->input('tags'));
+            $post->tags()->detach($tagsToUpdate['detach']);
+            $post->tags()->attach($tagsToUpdate['attach']);
+        }
 
         return response()->json($post);
     }
@@ -191,5 +205,11 @@ class PostController extends Controller
     {
         $post = Post::where('id', $id)->firstOrFail();
         $post->delete();
+    }
+
+    public function getPostsByTag(string $tag)
+    {
+        $posts = PostService::getPostsByTag($tag);
+        response()->json($posts);
     }
 }

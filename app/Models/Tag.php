@@ -10,12 +10,13 @@ class Tag extends Model
 {
     use HasFactory;
 
+    public $timestamp = false;
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = [
+     protected $fillable = [
         'id',
         'label',
     ];

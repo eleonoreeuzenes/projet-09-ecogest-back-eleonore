@@ -65,4 +65,16 @@ class PostService
 
         return $posts;
     }
+
+    public function getPostsByTag(string $tag)
+    {
+        // Posts qui contiennent le tag suivant 
+        $tagModel = Tag::where('label', $tag)->first();
+
+        if (!$tagModel) {
+            return response()->json(['error' => 'Tag not found.'], 404);
+        }
+        return $tagModel->posts;
+
+    }
 }
