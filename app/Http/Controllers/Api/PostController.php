@@ -34,7 +34,7 @@ class PostController extends Controller
                 }
                 $post->category;
                 $post->like;
-                $post->comment;
+                $post->comment->load('users');
                 $post->user->badge;
                 $postsOfUserCommunity[] = $post;
             }
@@ -131,7 +131,7 @@ class PostController extends Controller
         }
         $post->category;
         $post->like;
-        $post->comment;
+        $post->comment->load('users');
         $post->user;
 
         return response()->json($post);
