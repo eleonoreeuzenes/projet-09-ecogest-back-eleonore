@@ -39,7 +39,7 @@ class PostController extends Controller
                     "updated_at",
                     "pivot"]);
                 $post->like;
-                $post->comment;
+                $post->comment->load('users');
                 $post->user->badge;
                 $postsOfUserCommunity[] = $post;
             }
@@ -146,6 +146,7 @@ class PostController extends Controller
             "updated_at",
             "pivot"]);
         $post->comment;
+        $post->comment->load('users');
         $post->user;
 
         return response()->json($post);

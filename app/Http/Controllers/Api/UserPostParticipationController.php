@@ -212,7 +212,7 @@ class UserPostParticipationController extends Controller
                 }
                 $post->category;
                 $post->like;
-                $post->comment;
+                $post->comment->load('users');
                 $post->user;
                 $userChallenges[] = $post;
             }
@@ -254,7 +254,7 @@ class UserPostParticipationController extends Controller
                     }
                     $post->category;
                     $post->like;
-                    $post->comment;
+                    $post->comment->load('users');
                     $post->user;
                     $userPostParticipationsAbandoned[] = $post;
                 }
@@ -298,7 +298,7 @@ class UserPostParticipationController extends Controller
                     }
                     $post->category;
                     $post->like;
-                    $post->comment;
+                    $post->comment->load('users');
                     $post->user;
                     $userPostParticipationsInProgress[] = $post;
                 }
@@ -341,7 +341,7 @@ class UserPostParticipationController extends Controller
                     }
                     $post->category;
                     $post->like;
-                    $post->comment;
+                    $post->comment->load('users');
                     $post->user;
                     $userPostParticipationsNext[] = $post;
                 }
@@ -379,7 +379,7 @@ class UserPostParticipationController extends Controller
                 }
                 $post->category;
                 $post->like;
-                $post->comment;
+                $post->comment->load('users');
                 $post->user;
                 $userActions[] = $post;
             }
