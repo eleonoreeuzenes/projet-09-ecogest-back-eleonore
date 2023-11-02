@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\UserPointCategoryController;
 use App\Http\Controllers\Api\UserPostParticipationController;
 use App\Http\Controllers\Api\UserTrophyController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\TagController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Knuckles\Scribe\Attributes\Header;
@@ -64,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('posts/{postId}/comments', [CommentController::class, 'store']);
     Route::patch('posts/comments/{id}', [CommentController::class, 'update']);
     Route::delete('posts/comments/{id}', [CommentController::class, 'destroy']);
+
+    Route::get('/posts-by-tag/{tag}', [PostController::class, 'getPostsByTag']);
     
     Route::get('users/{userId}/actions', [UserPostParticipationController::class, 'getUserActions']);
     Route::get('users/{userId}/challenges/completed', [UserPostParticipationController::class, 'getPostsByUserCompleted']);
@@ -74,7 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Search
     Route::get('/search/{q}', [SearchController::class, 'getResult']);
-
+    
     Route::post('users/{userId}/subscribe', [SubscriptionController::class, 'subscribe']);
     Route::delete('users/{userId}/unsubscribe', [SubscriptionController::class, 'unSubscribe']);
     Route::post('users/{userId}/accept-subscription-request', [SubscriptionController::class, 'acceptSubscriptionRequest']);
@@ -87,5 +90,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'categories'  => CategoryController::class, 
         'users/{userId}/categories-points'  => UserPointCategoryController::class, // user points in categories
         'users/{userId}/trophies'  => UserTrophyController::class, // user trophies
+        'tags'        => TagController::class,
     ]);
 });
