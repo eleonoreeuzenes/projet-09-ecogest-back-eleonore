@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Like;
 use App\Models\Post;
+use App\Notifications\PostLiked;
 
 class LikeController extends Controller
 {
@@ -34,6 +35,9 @@ class LikeController extends Controller
         ]);
 
         $like->save();
+
+        $post->user->notify(new PostLiked($like));
+
         return response()->json($like);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\UserPointCategory;
 use App\Models\UserPostParticipation;
 use DateTime;
@@ -30,7 +31,7 @@ class PostService
 
     public static function createUserPointCategoryWithZeroPoint(Post $post, int $partcipantId)
     {
-        $userPointCategoryAlreadyExists = UserPointCategory::where(['user_id' => $partcipantId, 'category_id' =>$post->category_id])->count();
+        $userPointCategoryAlreadyExists = UserPointCategory::where(['user_id' => $partcipantId, 'category_id' => $post->category_id])->count();
         if ($userPointCategoryAlreadyExists == 0) {
             $userPointCategory = UserPointCategory::create([
                 'user_id' => $partcipantId,
@@ -41,5 +42,40 @@ class PostService
 
             $userPointCategory->save();
         }
+    }
+
+    public static function searchByTitleOrDescriptionOrTag(string $q)
+    {
+        // Participant lists with details
+        $posts = Post::where('title', 'ILIKE', '%' . $q . '%')
+            ->orWhere('description', 'ILIKE', '%' . $q . '%')
+            ->orWhere('tag', 'ILIKE', '%' . $q . '%')
+            ->take(10)
+            ->get();
+
+        foreach ($posts as $post) {
+            foreach ($post->userPostParticipation as $userPostParticipation) {
+                $userPostParticipation->users;
+            }
+            $post->category;
+            $post->tag;
+            $post->like;
+            $post->comment;
+            $post->user->badge;
+        }
+
+        return $posts;
+    }
+
+    public static function getPostsByTag(string $tag)
+    {
+        // Posts qui contiennent le tag suivant 
+        $tagModel = Tag::where('label', $tag)->first();
+
+        if (!$tagModel) {
+            return null;
+        }
+        return $tagModel->posts;
+
     }
 }

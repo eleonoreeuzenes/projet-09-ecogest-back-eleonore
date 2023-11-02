@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Reward;
+use App\Models\Subscription;
 use App\Models\UserPostParticipation;
 use App\Services\PostService;
 use App\Services\UserPointService;
@@ -64,7 +65,7 @@ class UserPostParticipationController extends Controller
         $userPostParticipation = UserPostParticipation::create([
             'participant_id' => $user->id,
             'post_id' => $postId,
-            'is_completed' => $request['is_completed'],
+            'is_completed' => false,
         ]);
         $userAlreadyParticipates = UserPostParticipation::where(['post_id' => $postId, 'participant_id' => $user->id])->first();
 
@@ -80,9 +81,16 @@ class UserPostParticipationController extends Controller
     public function show(int $id)
     {
         $user = auth()->user();
-
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipation = UserPostParticipation::where(['participant_id' => $user->id, 'id' => $id])->first();
@@ -139,11 +147,9 @@ class UserPostParticipationController extends Controller
         $userPostParticipation->is_completed = true;
 
         $post = Post::where('id', $postId)->firstOrFail();
-        $trophy = Reward::where('type', 'trophy')->firstOrFail();
         $userPointCategory = UserPointCategory::where(['user_id' => $user->id, 'category_id' => $post->category_id])->firstOrFail();
 
-        UserPointService::updateUserCurrentPointCategory($post, $userPointCategory, $trophy);
-        UserPointService::updateUserTotalPointCategory($post, $userPointCategory);
+        UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
 
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);
@@ -159,8 +165,16 @@ class UserPostParticipationController extends Controller
     public function getPostsByUser(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where('participant_id', $user->id)->get();
@@ -174,14 +188,37 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserCompleted(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
+        $userPostParticipations->load('posts')->where('type', "challenge");
 
-        $userPostParticipations->load('posts');
-        return response()->json($userPostParticipations);
+        $userChallenges = [];
+        foreach ($userPostParticipations as $userPostParticipation) {
+            if ($userPostParticipation->posts->type == 'challenge') {
+                $post = $userPostParticipation->posts;
+                foreach ($post->userPostParticipation as $userPostParticipation) {
+                    $userPostParticipation->users;
+                }
+                $post->category;
+                $post->like;
+                $post->comment->load('users');
+                $post->user;
+                $userChallenges[] = $post;
+            }
+        }
+
+        return response()->json($userChallenges);
     }
 
     /**
@@ -190,18 +227,39 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserAbandoned(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipations->load('posts')->where('type', "challenge");
+
         $userPostParticipationsAbandoned = [];
         foreach ($userPostParticipations as $userPostParticipation) {
             $post = $userPostParticipation->posts;
             $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
-            if ($end_date != null && $end_date < new DateTime()) {
-                $userPostParticipationsAbandoned[] = $post;
+            if ($userPostParticipation->posts->type == 'challenge') {
+                if ($end_date != null && $end_date < new DateTime()) {
+                    $post = $userPostParticipation->posts;
+                    foreach ($post->userPostParticipation as $userPostParticipation) {
+                        $userPostParticipation->users;
+                    }
+                    $post->category;
+                    $post->like;
+                    $post->comment->load('users');
+                    $post->user;
+                    $userPostParticipationsAbandoned[] = $post;
+                }
             }
+
         }
         return response()->json($userPostParticipationsAbandoned);
     }
@@ -212,44 +270,122 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserInProgress(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipations->load('posts')->where('type', "challenge");
+
         $userPostParticipationsInProgress = [];
         foreach ($userPostParticipations as $userPostParticipation) {
             $post = $userPostParticipation->posts;
             $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
             $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
-            if ($start_date < new DateTime() && $end_date > new DateTime()) {
-                $userPostParticipationsInProgress[] = $post;
+            if ($userPostParticipation->posts->type == 'challenge') {
+                if ($start_date < new DateTime() && $end_date > new DateTime()) {
+                    $post = $userPostParticipation->posts;
+                    foreach ($post->userPostParticipation as $userPostParticipation) {
+                        $userPostParticipation->users;
+                    }
+                    $post->category;
+                    $post->like;
+                    $post->comment->load('users');
+                    $post->user;
+                    $userPostParticipationsInProgress[] = $post;
+                }
             }
         }
         return response()->json($userPostParticipationsInProgress);
     }
 
-    
+
     /**
      * Get posts by user id with is_completed next
      */
     public function getPostsByUserNext(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        if (!$user) {
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
+        $userPostParticipations->load('posts')->where('type', "challenge");
+
         $userPostParticipationsNext = [];
         foreach ($userPostParticipations as $userPostParticipation) {
             $post = $userPostParticipation->posts;
             $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
-            if ($start_date != null && $start_date < new DateTime()) {
-                $userPostParticipationsNext[] = $post;
+            if ($userPostParticipation->posts->type == 'challenge') {
+                if ($start_date != null && $start_date < new DateTime()) {
+                    $post = $userPostParticipation->posts;
+                    foreach ($post->userPostParticipation as $userPostParticipation) {
+                        $userPostParticipation->users;
+                    }
+                    $post->category;
+                    $post->like;
+                    $post->comment->load('users');
+                    $post->user;
+                    $userPostParticipationsNext[] = $post;
+                }
             }
         }
         return response()->json($userPostParticipationsNext);
+    }
+
+    /**
+     * Get posts by user id with => action 
+     */
+    public function getUserActions(int $userId)
+    {
+        $user = User::where('id', $userId)->firstOrFail();
+        $userAuthenticated = auth()->user();
+        
+        if (!$userAuthenticated || !$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($user->is_private) {
+            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
+                return response()->json(['error' => 'User private'], 400);
+            }
+        }
+
+        $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
+        $userActions = [];
+
+        foreach ($userPostParticipations as $userPostParticipation) {
+            if ($userPostParticipation->posts->type == 'action') {
+                $post = $userPostParticipation->posts;
+                foreach ($post->userPostParticipation as $userPostParticipation) {
+                    $userPostParticipation->users;
+                }
+                $post->category;
+                $post->like;
+                $post->comment->load('users');
+                $post->user;
+                $userActions[] = $post;
+            }
+        }
+
+        return response()->json($userActions);
     }
 
 }

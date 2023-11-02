@@ -20,16 +20,22 @@ class UserPointService
         $userTrophy->save();
     }
 
-    public static function updateUserCurrentPointCategory(Post $post, UserPointCategory $userPointCategory, Reward $reward)
+    public static function updateUserCurrentPointCategory(Post $post, UserPointCategory $userPointCategory)
     {
-        $start_date = new DateTime (date("Y-m-d", strtotime($post->start_date)));
-        $end_date = new DateTime (date("Y-m-d", strtotime($post->end_date)));
+        $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+        $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
         $nbDays = $start_date->diff($end_date)->days;
         $nbPoint = $userPointCategory->current_point + (self::getLevelInPoints($post->level) * $nbDays);
+        $reward = Reward::where('type', 'trophy')->firstOrFail();
+        UserPointService::updateUserTotalPointCategory($post, $userPointCategory);
         if ($nbPoint < $reward->point) {
             $userPointCategory->current_point = $nbPoint;
         } else {
-            $userPointCategory->current_point = $nbPoint - $reward->point;
+            if ($reward->point < 2 * $nbPoint) {
+                $userPointCategory->current_point = 0;
+            } else {
+                $userPointCategory->current_point = $reward->point - $nbPoint;
+            }
             self::newTrophy($userPointCategory);
         }
         $userPointCategory->save();
@@ -37,8 +43,8 @@ class UserPointService
 
     public static function updateUserTotalPointCategory(Post $post, UserPointCategory $userPointCategory)
     {
-        $start_date = new DateTime (date("Y-m-d", strtotime($post->start_date)));
-        $end_date = new DateTime (date("Y-m-d", strtotime($post->end_date)));
+        $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+        $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
         $nbDays = $start_date->diff($end_date)->days;
         $userPointCategory->total_point = $userPointCategory->total_point + (self::getLevelInPoints($post->level) * $nbDays);
         $userPointCategory->save();
@@ -60,12 +66,12 @@ class UserPointService
     {
         $userPointCategories = UserPointCategory::select('total_point')->where('user_id', $user->id)->get();
         $userTotalPoints = 0;
-        foreach($userPointCategories as $userPointCategory) {
+        foreach ($userPointCategories as $userPointCategory) {
             $userTotalPoints += $userPointCategory->total_point;
         }
         $whereData = [
-            ['type' , 'badge'],
-            ['point', '<=',  $userTotalPoints]
+            ['type', 'badge'],
+            ['point', '<=', $userTotalPoints]
         ];
         $reward = Reward::orderBy('point', 'DESC')->where($whereData)->firstOrFail();
         $user->badge_id = $reward->id;

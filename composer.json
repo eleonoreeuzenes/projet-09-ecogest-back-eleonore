@@ -14,6 +14,7 @@
         "fakerphp/faker": "^1.9.1"
     },
     "require-dev": {
+        "knuckleswtf/scribe": "^4.25",
         "laravel/pint": "^1.0",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",

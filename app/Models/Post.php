@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Comment;
 use App\Models\Like;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
@@ -21,7 +22,6 @@ class Post extends Model
         'id',
         'category_id',
         'author_id',
-        'tag',
         'title',
         'description',
         'image',
@@ -54,5 +54,10 @@ class Post extends Model
     public function userPostParticipation()
     {
         return $this->hasMany(UserPostParticipation::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'tag_post', 'post_id', 'tag_id');
     }
 }
