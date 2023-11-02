@@ -14,30 +14,16 @@ class TagService
     public static function addTagsToPost(array $tags)
     {
         $allTags = Tag::get();
-        $newTags = [];
         $tagsToAttach = [];
         
         foreach ($tags as $tag) {
             if (!in_array($tag['label'], $allTags->pluck('label')->toArray())) {
                 $newTag = Tag::create(['label' => $tag['label']]);
+                $newTag->save();
                 $tagsToAttach[] = $newTag->id;
             } else {
                 $tagsToAttach[] = $allTags->where('label', $tag['label'])->first()->id;
             }
-        }
-        
-        if (count($newTags) > 0) {
-            
-            DB::transaction(function () {
-                foreach ($newTag as $newTags) {
-                    $tag = Tag::create([
-                        'label' => $label,
-                    ]);
-            
-                    $tag->save();
-                    $tagsToAttach[] = $tag;
-                }
-            });
         }
 
         return $tagsToAttach;
