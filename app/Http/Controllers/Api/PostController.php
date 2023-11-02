@@ -84,12 +84,10 @@ class PostController extends Controller
 
         $validated['author_id'] = $user->id;
         $validated['category_id'] = $category->id;
-       
 
         $post = Post::create($validated);
         PostService::addAuthorPostToUserPostParticipation($post);
 
-        
         $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
         UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
         
@@ -99,7 +97,7 @@ class PostController extends Controller
         $post->save();
           
         // If user adds tags
-        if ($validated['tags']) {
+        if (isset($validated['tags'])) {
             $tagsToAttach = TagService::addTagsToPost($validated['tags']);
             foreach($tagsToAttach as $tagId) {
                 $post->tags()->attach($tagId);
