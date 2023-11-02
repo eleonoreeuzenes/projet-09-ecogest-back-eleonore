@@ -29,7 +29,7 @@ class PostController extends Controller
         $postsOfUserCommunity = [];
 
         foreach ($posts as $post) {
-            if ($user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->id == $post->author_id) {
+            if ($user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->id == $post->author_id || !$user->is_private) {
                 foreach ($post->userPostParticipation as $userPostParticipation) {
                     $userPostParticipation->users;
                 }
@@ -121,7 +121,7 @@ class PostController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -130,10 +130,6 @@ class PostController extends Controller
 
         if (!$post) {
             return response()->json(['error' => 'Post not found.'], 404);
-        }
-
-        if ((!$user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->is_private == true) && $user->id != $post->author_id) {
-            return response()->json(['error' => 'User private'], 400);
         }
 
         foreach ($post->userPostParticipation as $userPostParticipation) {

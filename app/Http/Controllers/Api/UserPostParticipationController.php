@@ -65,7 +65,7 @@ class UserPostParticipationController extends Controller
         $userPostParticipation = UserPostParticipation::create([
             'participant_id' => $user->id,
             'post_id' => $postId,
-            'is_completed' => $request['is_completed'],
+            'is_completed' => false,
         ]);
         $userAlreadyParticipates = UserPostParticipation::where(['post_id' => $postId, 'participant_id' => $user->id])->first();
 
@@ -88,7 +88,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -172,7 +172,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -195,7 +195,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -234,7 +234,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -277,7 +277,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -321,7 +321,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }
@@ -363,7 +363,7 @@ class UserPostParticipationController extends Controller
         }
         if ($user->is_private) {
             $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1) {
+            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
                 return response()->json(['error' => 'User private'], 400);
             }
         }

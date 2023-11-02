@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Notifications\PostCommented;
 
 class CommentController extends Controller
 {
@@ -17,6 +18,10 @@ class CommentController extends Controller
         $user = auth()->user();
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
+        }
+        $post = Post::where('id', $postId)->first();
+        if (!$post) {
+            return response()->json(['error' => 'Post not found.'], 404);
         }
 
         $validated = $request->validate([
@@ -30,6 +35,8 @@ class CommentController extends Controller
         ]);
 
         $comment->save();
+        $post->user->notify(new PostCommented($comment));
+
         return response()->json($comment);
     }
 
@@ -48,7 +55,7 @@ class CommentController extends Controller
         }
 
         $comment = Comment::where('id', $id)->firstOrFail();
-    
+
         $validated = $request->validate([
             'content' => "required|string",
         ]);
