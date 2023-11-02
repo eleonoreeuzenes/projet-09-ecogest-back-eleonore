@@ -101,7 +101,9 @@ class PostController extends Controller
         // If user adds tags
         if ($validated['tags']) {
             $tagsToAttach = TagService::addTagsToPost($validated['tags']);
-            $post->tags()->attach($tagsToAttach);
+            foreach($tagsToAttach as $tagId) {
+                $post->tags()->attach($tagId);
+            }
         }
 
         return response()->json($validated);
