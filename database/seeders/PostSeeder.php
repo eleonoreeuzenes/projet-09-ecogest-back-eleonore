@@ -18,7 +18,7 @@ class PostSeeder extends Seeder
             'author_id' => 1,
             'title' => 'Semaine de vélo taf',
             'description' => 'Semaine de vélo taf',
-            'type' => 'challenge',
+            'type' => 'action',
             'level' => 'medium'
         ]);
         Post::factory()
