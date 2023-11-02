@@ -77,5 +77,4 @@ class UserPointService
         $user->badge_id = $reward->id;
         $user->save();
     }
-
 }
