@@ -49,7 +49,9 @@ class PostService
         // Participant lists with details
         $posts = Post::where('title', 'ILIKE', '%' . $q . '%')
             ->orWhere('description', 'ILIKE', '%' . $q . '%')
-            ->orWhere('tag', 'ILIKE', '%' . $q . '%')
+            // todo :
+            // rechercher pour inclure les tags avec une fonction dans un orWhere
+            // ->orWhere('tag', 'ILIKE', '%' . $q . '%')
             ->take(10)
             ->get();
 
