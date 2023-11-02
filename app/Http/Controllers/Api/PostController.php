@@ -6,6 +6,7 @@ use App\Models\Reward;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\PostService;
+use App\Services\TagService;
 use App\Models\Category;
 use App\Services\UserPointService;
 use Illuminate\Http\Request;
@@ -33,8 +34,12 @@ class PostController extends Controller
                     $userPostParticipation->users;
                 }
                 $post->category;
+                $post->tags->setHidden([
+                    "created_at",
+                    "updated_at",
+                    "pivot"]);
                 $post->like;
-                $post->comment;
+                $post->comment->load('users');
                 $post->user->badge;
                 $postsOfUserCommunity[] = $post;
             }
@@ -54,9 +59,8 @@ class PostController extends Controller
         }
 
         $validated = $request->validate([
-            'category_id' => 'required|integer',
-            "tag" => "nullable|array",
-            "tag.*" => "nullable|string",
+            'category_id' => 'required|integer',            
+            "tags" => "nullable|array",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
@@ -80,20 +84,26 @@ class PostController extends Controller
 
         $validated['author_id'] = $user->id;
         $validated['category_id'] = $category->id;
-        if ($request['tag']) {
-            $validated['tag'] = implode($request['tag.*']);
-            // it's a solution to convert string to array from laravel to postgresql
-        }
+       
+
         $post = Post::create($validated);
         PostService::addAuthorPostToUserPostParticipation($post);
 
+        
         $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
         UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
-
+        
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);
 
         $post->save();
+          
+        // If user adds tags
+        if ($validated['tags']) {
+            $tagsToAttach = TagService::addTagsToPost($validated['tags']);
+            $post->tags()->attach($tagsToAttach);
+        }
+
         return response()->json($validated);
     }
 
@@ -127,7 +137,12 @@ class PostController extends Controller
         }
         $post->category;
         $post->like;
+        $post->tags->setHidden([
+            "created_at",
+            "updated_at",
+            "pivot"]);
         $post->comment;
+        $post->comment->load('users');
         $post->user;
 
         return response()->json($post);
@@ -150,8 +165,7 @@ class PostController extends Controller
         $post = Post::where('id', $id)->firstOrFail();
 
         $validated = $request->validate([
-            "tag" => "array",
-            "tag.*" => "nullable|string",
+            "tags" => "nullable|array",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:255',
@@ -168,13 +182,11 @@ class PostController extends Controller
             }
         }
 
-        if ($request['tag']) {
-            $validated['tag'] = implode($request['tag.*']);
-            // it's a solution to convert string to array from laravel to postgresql
+        if ($validated['tags']) {
+            $post = TagService::updateTagsToPost($post, $validated['tags']);
         }
-
         $post->update($validated);
-
+        
         return response()->json($post);
     }
 
@@ -185,5 +197,35 @@ class PostController extends Controller
     {
         $post = Post::where('id', $id)->firstOrFail();
         $post->delete();
+    }
+
+    public function getPostsByTag(string $tag)
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return response()->json([
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        $posts = PostService::getPostsByTag($tag);
+
+        foreach ($posts as $post) {
+            $post->category;
+            $post->like;
+            $post->setHidden(["pivot"]);
+            $post->tags->setHidden([
+                "created_at",
+                "updated_at",
+                "pivot"]);
+            $post->comment;
+            $post->user;
+        }
+
+        if ($posts === null) {
+            return response()->json(['error' => 'Tag not found.'], 404);
+        }
+        return response()->json($posts);
     }
 }

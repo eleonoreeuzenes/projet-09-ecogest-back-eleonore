@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\UserPointCategory;
 use App\Models\UserPostParticipation;
 use DateTime;
@@ -57,11 +58,24 @@ class PostService
                 $userPostParticipation->users;
             }
             $post->category;
+            $post->tag;
             $post->like;
             $post->comment;
             $post->user->badge;
         }
 
         return $posts;
+    }
+
+    public static function getPostsByTag(string $tag)
+    {
+        // Posts qui contiennent le tag suivant 
+        $tagModel = Tag::where('label', $tag)->first();
+
+        if (!$tagModel) {
+            return null;
+        }
+        return $tagModel->posts;
+
     }
 }

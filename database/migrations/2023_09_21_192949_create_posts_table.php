@@ -22,19 +22,16 @@ return new class extends Migration
                 table: 'users',
                 indexName: 'post_user_id'
             )->cascadeOnDelete();
-            $table->string('tag')->nullable();
-            $table->string('title')->nullable();;
-            $table->text('description')->nullable();;
-            $table->string('image')->nullable();;
-            $table->string('position')->nullable();;
+            $table->string('title')->nullable();
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
+            $table->string('position')->nullable();
             $table->enum('type', ['action', 'challenge']);
             $table->enum('level', ['easy', 'medium', 'hard']);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->timestamps();
         });
-
-        DB::statement('ALTER TABLE posts ALTER COLUMN tag TYPE text[] USING ARRAY[tag]');
     }
 
     /**
