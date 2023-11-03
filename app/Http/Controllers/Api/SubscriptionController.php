@@ -22,7 +22,7 @@ class SubscriptionController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $userAlreadySubscribed = Subscription::where(['follower_id' => $userAuthenticated->id, 'follow_id' => $userId])
+        $userAlreadySubscribed = Subscription::where(['follower_id' => $userAuthenticated->id, 'following_id' => $userId])
             ->where(function ($query) {
                 $query->where('status', 'approved')->orWhere('status', 'pending');
             });
