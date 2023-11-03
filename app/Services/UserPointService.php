@@ -22,9 +22,15 @@ class UserPointService
 
     public static function updateUserCurrentPointCategory(Post $post, UserPointCategory $userPointCategory)
     {
-        $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
-        $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
-        $nbDays = $start_date->diff($end_date)->days;
+        if(isset($post->start_date) && isset($post->end_date)) {
+            $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+            $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
+            $nbDays = $start_date->diff($end_date)->days;
+        }
+        else {
+            $nbDays = 1;
+        }
+
         $nbPoint = $userPointCategory->current_point + (self::getLevelInPoints($post->level) * $nbDays);
         $reward = Reward::where('type', 'trophy')->firstOrFail();
         UserPointService::updateUserTotalPointCategory($post, $userPointCategory);
