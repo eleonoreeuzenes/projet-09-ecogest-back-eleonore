@@ -24,7 +24,7 @@ class PostController extends Controller
     {
         $user = auth()->user();
 
-        $posts = Post::orderBy('created_at', 'DESC')->paginate(30);
+        $posts = Post::orderBy('created_at', 'DESC')->paginate(8);
 
         $postsOfUserCommunity = [];
 
