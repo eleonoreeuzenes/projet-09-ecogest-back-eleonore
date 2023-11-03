@@ -334,7 +334,7 @@ class UserPostParticipationController extends Controller
             $post = $userPostParticipation->posts;
             $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
             if ($userPostParticipation->posts->type == 'challenge') {
-                if ($start_date != null && $start_date < new DateTime()) {
+                if ($start_date != null && $start_date > new DateTime(date("Y-m-d"))) {
                     $post = $userPostParticipation->posts;
                     foreach ($post->userPostParticipation as $userPostParticipation) {
                         $userPostParticipation->users;
