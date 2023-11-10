@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Reward;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Services\ErrorHandlerService;
 use App\Services\PostService;
 use App\Services\TagService;
 use App\Models\Category;
@@ -14,22 +15,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\UserPointCategory;
 use App\Models\UserTrophy;
+use App\Services\UserService;
 
 class PostController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $user = auth()->user();
-
         $posts = Post::orderBy('created_at', 'DESC')->paginate(8);
 
         $postsOfUserCommunity = [];
 
         foreach ($posts as $post) {
-            if ($user->following->load('follower')->where('status', 'approved')->contains('following_id', $post->author_id) || $user->id == $post->author_id || !$user->is_private) {
+            if (UserService::checkIfCanAccessToRessource($post->author_id)) {
                 foreach ($post->userPostParticipation as $userPostParticipation) {
                     $userPostParticipation->users;
                 }
@@ -37,7 +38,8 @@ class PostController extends Controller
                 $post->tags->setHidden([
                     "created_at",
                     "updated_at",
-                    "pivot"]);
+                    "pivot"
+                ]);
                 $post->like;
                 $post->comment->load('users');
                 $post->user->badge;
@@ -59,7 +61,7 @@ class PostController extends Controller
         }
 
         $validated = $request->validate([
-            'category_id' => 'required|integer',            
+            'category_id' => 'required|integer',
             "tags" => "nullable|array",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -90,16 +92,16 @@ class PostController extends Controller
 
         $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
         UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
-        
+
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);
 
         $post->save();
-          
+
         // If user adds tags
         if (isset($validated['tags'])) {
             $tagsToAttach = TagService::addTagsToPost($validated['tags']);
-            foreach($tagsToAttach as $tagId) {
+            foreach ($tagsToAttach as $tagId) {
                 $post->tags()->attach($tagId);
             }
         }
@@ -113,21 +115,12 @@ class PostController extends Controller
      */
     public function show(int $id)
     {
-        $user = auth()->user();
-        $userAuthenticated = auth()->user();
-        
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
-        }
-
         $post = Post::where('id', $id)->firstOrFail();
-
+        $user = User::where('id', $post->author_id)->firstOrFail();
+        if (!UserService::checkIfCanAccessToRessource($user->id)) {
+            return response()->json(['error' => 'User private'], 400);
+        }
+        
         if (!$post) {
             return response()->json(['error' => 'Post not found.'], 404);
         }
@@ -140,7 +133,8 @@ class PostController extends Controller
         $post->tags->setHidden([
             "created_at",
             "updated_at",
-            "pivot"]);
+            "pivot"
+        ]);
         $post->comment;
         $post->comment->load('users');
         $post->user;
@@ -186,7 +180,7 @@ class PostController extends Controller
             $post = TagService::updateTagsToPost($post, $validated['tags']);
         }
         $post->update($validated);
-        
+
         return response()->json($post);
     }
 
@@ -218,7 +212,8 @@ class PostController extends Controller
             $post->tags->setHidden([
                 "created_at",
                 "updated_at",
-                "pivot"]);
+                "pivot"
+            ]);
             $post->comment;
             $post->user;
         }

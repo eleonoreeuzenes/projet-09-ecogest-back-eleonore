@@ -83,4 +83,15 @@ class UserPointService
         $user->badge_id = $reward->id;
         $user->save();
     }
+    public static function userTotalPoints($userId) : int
+    {
+        $user = User::where("id", $userId)->firstOrFail();
+        
+        $userPointCategories = UserPointCategory::select('total_point')->where('user_id', $user->id)->get();
+        $userTotalPoints = 0;
+        foreach ($userPointCategories as $userPointCategory) {
+            $userTotalPoints += $userPointCategory->total_point;
+        }
+        return $userTotalPoints;
+    }
 }

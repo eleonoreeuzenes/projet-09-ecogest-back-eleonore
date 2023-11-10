@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Subscription;
 use App\Models\User;
-use DateTime;
 
 class UserService
 {
@@ -21,5 +21,22 @@ class UserService
         }
 
         return $users;
+    }
+
+    public static function checkIfCanAccessToRessource($authorId): bool
+    {
+        $author = User::where("id", $authorId)->firstOrFail();
+        $userAuthenticated = auth()->user();
+
+        if (!$userAuthenticated || !$author) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+        if ($author->is_private) {
+            $userAuthenticatedFollowing = Subscription::where(['status' => 'approved', 'following_id' => $author->id, 'follower_id' => $userAuthenticated->id]);
+            if ($userAuthenticatedFollowing->count() < 1 && $author->id != $userAuthenticated->id) {
+                return false;
+            }
+        }
+        return true;
     }
 }
