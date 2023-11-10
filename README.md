@@ -43,3 +43,6 @@ ou
 ## L'api laravel est disponible ici : 
 * http://localhost:8080
 
+ ## Jouer les tests 
+
+ `composer test`

@@ -88,11 +88,11 @@ class PostController extends Controller
         $post = Post::create($validated);
         PostService::addAuthorPostToUserPostParticipation($post);
 
-        // $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
-        // // UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
+        $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
+        UserPointService::updateUserCurrentPointCategory($post, $userPointCategory);
         
-        // $userModel = User::where('id', $user->id)->firstOrFail();
-        // // UserPointService::setNewBadge($userModel);
+        $userModel = User::where('id', $user->id)->firstOrFail();
+        UserPointService::setNewBadge($userModel);
 
         $post->save();
           

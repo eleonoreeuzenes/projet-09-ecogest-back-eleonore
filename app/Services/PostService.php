@@ -26,7 +26,7 @@ class PostService
         ]);
         $userPostParticipation->save();
 
-        // self::createUserPointCategoryWithZeroPoint($post, $userPostParticipation->participant_id);
+        self::createUserPointCategoryWithZeroPoint($post, $userPostParticipation->participant_id);
     }
 
     public static function createUserPointCategoryWithZeroPoint(Post $post, int $partcipantId)
