@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\UserPostParticipationController;
 use App\Http\Controllers\Api\UserTrophyController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Knuckles\Scribe\Attributes\Header;
@@ -87,6 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // notifications 
     Route::get('/me/notifications', [NotificationsController::class, 'index']);
+
+    // Report
+    Route::post('/submit-report', [ReportController::class, 'submitReport']); 
 
 
     // API business routes
