@@ -19,7 +19,6 @@ class ReportController extends Controller
             'postID' => 'required',
             'postTitle' => 'required',
             'authorID' => 'required',
-            'authorName' => 'required',
             'result' => 'required',
             'postContent' => 'nullable',
         ]);
