@@ -16,11 +16,11 @@ class ReportController extends Controller
         }
 
         $validatedData = $request->validate([
-            'postID' => 'required',
-            'postTitle' => 'required',
+            'ID' => 'required',
+            'title' => 'required',
             'authorID' => 'required',
             'result' => 'required',
-            'postContent' => 'nullable',
+            'content' => 'nullable',
         ]);
      
         Mail::to('report@ecogest.dev')->send(new \App\Mail\ReportMail($validatedData));
