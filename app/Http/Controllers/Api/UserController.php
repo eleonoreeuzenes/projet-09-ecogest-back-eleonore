@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\UserPointCategory;
+use App\Services\UserPointService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -36,7 +38,8 @@ class UserController extends Controller
     $user->userPostParticipation;
     $user->follower;
     $user->following;
-
+    $user->total_point = UserPointService::userTotalPoints($user->id);
+    
     return response()->json($user);
   }
 
@@ -50,16 +53,15 @@ class UserController extends Controller
       return response()->json(['error' => 'User not found.'], 404);
     }
 
-    if ($userAuthenticated->following->load('following')->where('status', 'approved')->contains('following_id', $userId) || !$user->is_private || $userId == $userAuthenticated->id) {
-      $user->badge;
-      $user->userTrophy;
-      $user->userPostParticipation;
-      $user->follower;
-      $user->following;
-    } else {
-      $user->badge;
+    $user->badge;
+    $user->total_point = UserPointService::userTotalPoints($user->id);
+
+    if (!UserService::checkIfCanAccessToRessource($user->id)) {
       $user->userTrophy = [];
       $user->userPostParticipation = [];
+    } else {
+      $user->userTrophy;
+      $user->userPostParticipation;
       $user->follower;
       $user->following;
     }
