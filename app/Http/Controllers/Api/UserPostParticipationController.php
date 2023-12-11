@@ -195,7 +195,7 @@ class UserPostParticipationController extends Controller
                 $post->category;
                 $post->like;
                 $post->comment->load('users');
-                $post->user;
+                $post->user->badge;
                 $userChallenges[] = $post;
             }
         }
@@ -229,7 +229,7 @@ class UserPostParticipationController extends Controller
                     $post->category;
                     $post->like;
                     $post->comment->load('users');
-                    $post->user;
+                    $post->user->badge;
                     $userPostParticipationsAbandoned[] = $post;
                 }
             }
@@ -266,7 +266,7 @@ class UserPostParticipationController extends Controller
                     $post->category;
                     $post->like;
                     $post->comment->load('users');
-                    $post->user;
+                    $post->user->badge;
                     $userPostParticipationsInProgress[] = $post;
                 }
             }
@@ -301,7 +301,7 @@ class UserPostParticipationController extends Controller
                     $post->category;
                     $post->like;
                     $post->comment->load('users');
-                    $post->user;
+                    $post->user->badge;
                     $userPostParticipationsNext[] = $post;
                 }
             }
@@ -331,7 +331,7 @@ class UserPostParticipationController extends Controller
                 $post->category;
                 $post->like;
                 $post->comment->load('users');
-                $post->user;
+                $post->user->badge;
                 $userActions[] = $post;
             }
         }
