@@ -159,6 +159,7 @@ class PostController extends Controller
         $post = Post::where('id', $id)->firstOrFail();
 
         $validated = $request->validate([
+            'category_id' => 'integer',
             "tags" => "nullable|array",
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
