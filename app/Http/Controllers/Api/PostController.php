@@ -137,7 +137,7 @@ class PostController extends Controller
         ]);
         $post->comment;
         $post->comment->load('users');
-        $post->user;
+        $post->user->badge;
 
         return response()->json($post);
     }
