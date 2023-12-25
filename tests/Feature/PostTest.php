@@ -15,8 +15,8 @@ class PostTest extends TestCase
 {
     const CHALLENGEDATA = [
         "category_id" => 7,
-        "title" => "Mais si ça marche",
-        "description" => "Test4 sans les tags",
+        "title" => "title",
+        "description" => "description",
         "type" => "challenge",
         "level" => "hard",
         "tags" => [
@@ -34,8 +34,8 @@ class PostTest extends TestCase
 
     const ACTIONDATA = [
         "category_id" => 7,
-        "title" => "Mais si ça marche",
-        "description" => "Test4 sans les tags",
+        "title" => "title",
+        "description" => "description",
         "type" => "action",
         "level" => "hard",
         "tags" => [
