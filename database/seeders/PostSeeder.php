@@ -48,5 +48,16 @@ class PostSeeder extends Seeder
             'type' => 'action',
             'level' => 'easy'
         ]);
+        Post::factory()
+        ->create([
+            'category_id' => 1,
+            'author_id' => 1,
+            'title' => 'Velo taf',
+            'description' => 'Velo taf pendant 5 jours',
+            'type' => 'challenge',
+            'level' => 'medium',
+            "start_date" => "2023-11-23T00:00:00.000",
+            "end_date" => "2023-11-28T00:00:00.000"
+        ]);
     }
 }
