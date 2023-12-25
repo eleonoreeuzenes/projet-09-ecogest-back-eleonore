@@ -103,7 +103,7 @@ class SubscriptionController extends Controller
             return response()->json(['error' => 'User not found.'], 404);
         }
 
-        $subscription = Subscription::where(['following_id' => $userAuthenticated->id, 'follower_id' => $userId, 'status' => 'pending']);
+        $subscription = Subscription::where(['follower_id' => $userAuthenticated->id, 'following_id' => $userId, 'status' => 'pending'])->firstOrFail();
         if ($subscription->count() == 0) {
             return response()->json(['error' => 'Subscription request not found.'], 404);
         }
