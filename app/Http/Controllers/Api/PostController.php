@@ -84,6 +84,11 @@ class PostController extends Controller
             }
         }
 
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('images');
+            $validated['image'] = $path;
+        }
+
         $validated['author_id'] = $user->id;
         $validated['category_id'] = $category->id;
 
@@ -120,7 +125,7 @@ class PostController extends Controller
         if (!UserService::checkIfCanAccessToRessource($user->id)) {
             return response()->json(['error' => 'User private'], 400);
         }
-        
+
         if (!$post) {
             return response()->json(['error' => 'Post not found.'], 404);
         }
@@ -149,7 +154,6 @@ class PostController extends Controller
     {
         $user = auth()->user();
 
-
         if ($user === null) {
             return response()->json([
                 'message' => 'User not found.'
@@ -177,7 +181,18 @@ class PostController extends Controller
             }
         }
 
-        if ($validated['tags']) {
+        $category = Category::where('id', $request['category_id'])->first();
+        if (!$category) {
+            return response()->json(['error' => 'Category not found.'], 404);
+        }
+
+        $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
+        UserPointService::updateUserCurrentPointCategoryUpdatedPost($post, $validated, $userPointCategory);
+
+        $userModel = User::where('id', $user->id)->firstOrFail();
+        UserPointService::setNewBadge($userModel);
+
+        if (isset($validated['tags'])) {
             $post = TagService::updateTagsToPost($post, $validated['tags']);
         }
         $post->update($validated);
