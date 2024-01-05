@@ -186,8 +186,8 @@ class PostController extends Controller
             return response()->json(['error' => 'Category not found.'], 404);
         }
 
-        $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->first();
-        UserPointService::updateUserCurrentPointCategoryUpdatedPost($post, $validated, $userPointCategory);
+        $userPointCategory = UserPointCategory::where('user_id', $user->id)->where('category_id', $category->id)->firstOrFail();
+        UserPointService::updateUserCurrentPointCategoryUpdatedPostSameCategory($post, $validated, $userPointCategory);
 
         $userModel = User::where('id', $user->id)->firstOrFail();
         UserPointService::setNewBadge($userModel);

@@ -46,9 +46,8 @@ class UserPointService
         $userPointCategory->save();
     }
 
-    public static function updateUserCurrentPointCategoryUpdatedPost(Post $post, array $updatedPost, UserPointCategory $userPointCategory)
+    public static function updateUserCurrentPointCategoryUpdatedPostSameCategory(Post $post, array $updatedPost, UserPointCategory $userPointCategory)
     {
-
         if (
             $updatedPost['end_date'] != $post->end_date ||
             $updatedPost['start_date'] != $post->start_date ||
@@ -80,6 +79,25 @@ class UserPointService
             }
             $userPointCategory->save();
         }
+    }
+
+    public static function updateUserCurrentPointCategoryUpdatedPostDifferentCategory(Post $post, array $updatedPost, UserPointCategory $userPointCategory, int $userId)
+    {
+        if (isset($post->start_date) && isset($post->end_date)) {
+            $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
+            $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
+            $nbDays = $start_date->diff($end_date)->days;
+        } else {
+            $nbDays = 1;
+        }
+        $oldUserPointCategory = UserPointCategory::where('user_id', $userId)->where('category_id', $updatedPost['category_id'])->firstOrFail();
+
+        $nbPoint = $oldUserPointCategory->current_point + (self::getLevelInPoints($post->level) * $nbDays);
+
+        $oldUserPointCategory->total_point = $oldUserPointCategory->total_point - $nbPoint;
+        self::updateUserCurrentPointCategory($post, $userPointCategory);
+
+        $oldUserPointCategory->save();
     }
 
 
