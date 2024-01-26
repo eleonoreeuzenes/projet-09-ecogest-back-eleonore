@@ -22,12 +22,11 @@ class UserPointService
 
     public static function updateUserCurrentPointCategory(Post $post, UserPointCategory $userPointCategory)
     {
-        if(isset($post->start_date) && isset($post->end_date)) {
+        if (isset($post->start_date) && isset($post->end_date)) {
             $start_date = new DateTime(date("Y-m-d", strtotime($post->start_date)));
             $end_date = new DateTime(date("Y-m-d", strtotime($post->end_date)));
             $nbDays = $start_date->diff($end_date)->days;
-        }
-        else {
+        } else {
             $nbDays = 1;
         }
 
@@ -37,11 +36,11 @@ class UserPointService
         if ($nbPoint < $reward->point) {
             $userPointCategory->current_point = $nbPoint;
         } else {
-            if ($reward->point < 2 * $nbPoint) {
-                $userPointCategory->current_point = 0;
-            } else {
-                $userPointCategory->current_point = $reward->point - $nbPoint;
+            $newCurrentPoint = $nbPoint;
+            while($newCurrentPoint >= $reward->point) {
+                $newCurrentPoint = $newCurrentPoint - $reward->point;
             }
+            $userPointCategory->current_point = $newCurrentPoint;
             self::newTrophy($userPointCategory);
         }
         $userPointCategory->save();
@@ -82,5 +81,16 @@ class UserPointService
         $reward = Reward::orderBy('point', 'DESC')->where($whereData)->firstOrFail();
         $user->badge_id = $reward->id;
         $user->save();
+    }
+    public static function userTotalPoints($userId) : int
+    {
+        $user = User::where("id", $userId)->firstOrFail();
+        
+        $userPointCategories = UserPointCategory::select('total_point')->where('user_id', $user->id)->get();
+        $userTotalPoints = 0;
+        foreach ($userPointCategories as $userPointCategory) {
+            $userTotalPoints += $userPointCategory->total_point;
+        }
+        return $userTotalPoints;
     }
 }

@@ -7,13 +7,14 @@ use App\Models\Subscription;
 use App\Models\UserPostParticipation;
 use App\Services\PostService;
 use App\Services\UserPointService;
+use App\Services\UserService;
 use DateTime;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\UserPointCategory;
-use GuzzleHttp\Psr7\Query;
+
 
 class UserPostParticipationController extends Controller
 {
@@ -80,20 +81,12 @@ class UserPostParticipationController extends Controller
      */
     public function show(int $id)
     {
-        $user = auth()->user();
-        $userAuthenticated = auth()->user();
-        
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
-        }
+        $userPostParticipation = UserPostParticipation::where('id', $id)->firstOrFail();
 
-        $userPostParticipation = UserPostParticipation::where(['participant_id' => $user->id, 'id' => $id])->first();
+        $user = User::where('id', $userPostParticipation->participant_id)->first();
+        if (!UserService::checkIfCanAccessToRessource($user->id)) {
+            return response()->json(['error' => 'User private'], 400);
+        }
 
         if (!$userPostParticipation) {
             return response()->json(['error' => 'User post participation not found.'], 404);
@@ -166,15 +159,12 @@ class UserPostParticipationController extends Controller
     {
         $user = User::where('id', $userId)->firstOrFail();
         $userAuthenticated = auth()->user();
-        
+
         if (!$userAuthenticated || !$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
+        if (!UserService::checkIfCanAccessToRessource($userId)) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where('participant_id', $user->id)->get();
@@ -188,16 +178,8 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserCompleted(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        $userAuthenticated = auth()->user();
-        
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
+        if (!UserService::checkIfCanAccessToRessource($userId)) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
@@ -213,7 +195,7 @@ class UserPostParticipationController extends Controller
                 $post->category;
                 $post->like;
                 $post->comment->load('users');
-                $post->user;
+                $post->user->badge;
                 $userChallenges[] = $post;
             }
         }
@@ -227,16 +209,8 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserAbandoned(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        $userAuthenticated = auth()->user();
-        
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
+        if (!UserService::checkIfCanAccessToRessource($userId)) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -255,7 +229,7 @@ class UserPostParticipationController extends Controller
                     $post->category;
                     $post->like;
                     $post->comment->load('users');
-                    $post->user;
+                    $post->user->badge;
                     $userPostParticipationsAbandoned[] = $post;
                 }
             }
@@ -270,16 +244,9 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserInProgress(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        $userAuthenticated = auth()->user();
-        
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
+        $user = User::where('id', $userId)->firstOrFail();
+        if (!UserService::checkIfCanAccessToRessource($userId)) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -299,7 +266,7 @@ class UserPostParticipationController extends Controller
                     $post->category;
                     $post->like;
                     $post->comment->load('users');
-                    $post->user;
+                    $post->user->badge;
                     $userPostParticipationsInProgress[] = $post;
                 }
             }
@@ -314,16 +281,8 @@ class UserPostParticipationController extends Controller
     public function getPostsByUserNext(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        $userAuthenticated = auth()->user();
-        
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
+        if (!UserService::checkIfCanAccessToRessource($userId)) {
+            return response()->json(['error' => 'User private'], 400);
         }
 
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => false])->get();
@@ -342,7 +301,7 @@ class UserPostParticipationController extends Controller
                     $post->category;
                     $post->like;
                     $post->comment->load('users');
-                    $post->user;
+                    $post->user->badge;
                     $userPostParticipationsNext[] = $post;
                 }
             }
@@ -356,18 +315,10 @@ class UserPostParticipationController extends Controller
     public function getUserActions(int $userId)
     {
         $user = User::where('id', $userId)->firstOrFail();
-        $userAuthenticated = auth()->user();
+        if (!UserService::checkIfCanAccessToRessource($userId)) {
+            return response()->json(['error' => 'User private'], 400);
+        }
         
-        if (!$userAuthenticated || !$user) {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-        if ($user->is_private) {
-            $userAuthenticatedFollowing =  Subscription::where(['status' => 'approved', 'following_id' => $user->id, 'follower_id' => $userAuthenticated->id]);
-            if ($userAuthenticatedFollowing->count() < 1 && $user->id != $userAuthenticated->id) {
-                return response()->json(['error' => 'User private'], 400);
-            }
-        }
-
         $userPostParticipations = UserPostParticipation::where(['participant_id' => $user->id, 'is_completed' => true])->get();
         $userActions = [];
 
@@ -380,7 +331,7 @@ class UserPostParticipationController extends Controller
                 $post->category;
                 $post->like;
                 $post->comment->load('users');
-                $post->user;
+                $post->user->badge;
                 $userActions[] = $post;
             }
         }
