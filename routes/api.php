@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\UserTrophyController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\ImageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Knuckles\Scribe\Attributes\Header;
@@ -30,6 +31,8 @@ use Knuckles\Scribe\Attributes\Header;
 |
 */
 
+
+
 Route::get('/test', fn() => json_encode(["test", "test"]));
 
 // Authentication
@@ -41,14 +44,19 @@ Route::post('/login', [LoginController::class, 'login']);
  * @unauthenticated
  */
 Route::post('/register', [RegisterController::class, 'register']);
+
+Route::get('image/{path}', [ImageController::class, 'getImage'])->where('path', '.*');
+
+
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', function (Request $request) {
-        return $request->user();
-    });
     // User 
     Route::get('/me', [UserController::class, 'getUserData']);
     Route::patch('/me', [UserController::class, 'update']);
     Route::delete('/me', [UserController::class, 'destroy']);
+
+    // images
+    Route::post('/users/{userId}/uploadImage', [ImageController::class, 'uploadImageUser']);
+    Route::post('/posts/{postId}/uploadImage', [ImageController::class, 'uploadImagePost']);
 
     // other user
     Route::get('users/{userId}', [UserController::class, 'show']);
@@ -102,3 +110,4 @@ Route::middleware('auth:sanctum')->group(function () {
         'tags'        => TagController::class,
     ]);
 });
+
